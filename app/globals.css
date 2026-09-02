@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --primary: #E87722;
+    --primary-dark: #C45E00;
+    --secondary: #1A1A1A;
+    --accent: #16A34A;
+    --surface: #F5F5F5;
+    --card: #FFFFFF;
+    --border: #E5E7EB;
+    --muted: #6B7280;
+    --background: 0 0% 96%;
+    --foreground: 0 0% 10%;
+    --radius: 0.75rem;
+  }
+
+  * { @apply border-border; }
+
+  body {
+    @apply bg-surface text-secondary font-sans antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-semibold;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #f1f1f1; }
+  ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-white rounded-lg font-semibold px-4 py-2.5 hover:bg-primary-dark transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-secondary border border-border rounded-lg font-semibold px-4 py-2.5 hover:bg-surface transition-colors active:scale-95;
+  }
+
+  .badge {
+    @apply text-xs font-medium px-2 py-0.5 rounded-full;
+  }
+
+  .badge-discount {
+    @apply badge bg-green-100 text-green-800;
+  }
+
+  .badge-new {
+    @apply badge bg-blue-100 text-blue-800;
+  }
+
+  .badge-cashback {
+    @apply badge bg-orange-100 text-orange-800;
+  }
+
+  .product-card {
+    @apply bg-white rounded-xl shadow-card border border-gray-100 hover:shadow-card-hover transition-all duration-200 overflow-hidden;
+  }
+
+  .section-title {
+    @apply text-xl font-heading font-semibold text-secondary;
+  }
+
+  .skeleton {
+    @apply animate-pulse bg-gray-200 rounded;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar { display: none; }
+}
+
+/* Page transition */
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.page-enter {
+  animation: page-enter 0.3s ease-out;
+}
+
+/* Cart drawer overlay */
+.cart-overlay {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+}
