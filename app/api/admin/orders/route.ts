@@ -11,8 +11,8 @@ export async function GET(req: NextRequest) {
     const page = Math.max(1, Number(searchParams.get('page') ?? 1));
     const limit = Math.min(50, Number(searchParams.get('limit') ?? 20));
 
-    const where = {
-      ...(status && { status: status as Parameters<typeof prisma.order.findMany>[0]['where'] extends { status?: infer S } ? S : never }),
+    const where: any = {
+      ...(status && { status }),
     };
 
     const [orders, total] = await Promise.all([

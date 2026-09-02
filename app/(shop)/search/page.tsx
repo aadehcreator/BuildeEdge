@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Search, Loader2 } from 'lucide-react';
 import ProductGrid from '@/components/product/ProductGrid';
@@ -12,7 +12,7 @@ interface SearchResult {
   score?: number;
 }
 
-export default function SearchPage() {
+function SearchContent() {
   const searchParams = useSearchParams();
   const q = searchParams.get('q') ?? '';
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -65,5 +65,13 @@ export default function SearchPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center py-20"><Loader2 size={32} className="animate-spin text-primary" /></div>}>
+      <SearchContent />
+    </Suspense>
   );
 }

@@ -16,7 +16,7 @@ const TRUST_BADGES = [
 ];
 
 async function getHomeData() {
-  const [banners, categories, featuredProducts, newProducts] = await Promise.all([
+  const [banners, categories, rawFeatured, rawNew] = await Promise.all([
     prisma.banner.findMany({ where: { isActive: true }, orderBy: { sortOrder: 'asc' } }),
     prisma.category.findMany({
       where: { isActive: true, parentId: null },
@@ -37,6 +37,14 @@ async function getHomeData() {
       take: 10,
     }),
   ]);
+  const featuredProducts = rawFeatured.map(p => ({
+    ...p,
+    bulkPrices: p.bulkPrices as Array<{ minQty: number; price: number }> | null,
+  }));
+  const newProducts = rawNew.map(p => ({
+    ...p,
+    bulkPrices: p.bulkPrices as Array<{ minQty: number; price: number }> | null,
+  }));
   return { banners, categories, featuredProducts, newProducts };
 }
 
