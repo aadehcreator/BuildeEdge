@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth';
+import { requireAuth, ensureUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { AddressSchema } from '@/lib/validators';
 
 export async function GET(req: NextRequest) {
   try {
     const user = requireAuth(req);
+    await ensureUser(prisma, user.userId, user.phone);
     const addresses = await prisma.address.findMany({
       where: { userId: user.userId },
       orderBy: [{ isDefault: 'desc' }, { id: 'asc' }],

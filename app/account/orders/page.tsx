@@ -1,9 +1,12 @@
 'use client';
+export const dynamic = 'force-dynamic';
+
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
 import { Package, ChevronRight, Loader2 } from 'lucide-react';
 import Image from 'next/image';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 interface Order {
   id: string; status: string; total: number; paymentMethod: string;
@@ -20,20 +23,23 @@ const STATUS_COLORS: Record<string, string> = {
   CANCELLED: 'bg-red-100 text-red-700',
 };
 
-export default function OrdersPage() {
+function OrdersContent() {
   const { accessToken } = useAuthStore();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!accessToken) return;
+    
     fetch('/api/orders', { headers: { Authorization: `Bearer ${accessToken}` } })
       .then((r) => r.json() as Promise<{ orders: Order[] }>)
       .then(({ orders }) => setOrders(orders ?? []))
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, [accessToken]);
 
   return (
-    <div>
+    <div className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="font-heading font-bold text-2xl text-secondary mb-6">My Orders</h1>
       {loading ? (
         <div className="flex justify-center py-12"><Loader2 size={28} className="animate-spin text-primary" /></div>
@@ -84,4 +90,12 @@ export default function OrdersPage() {
       )}
     </div>
   );
+}
+
+export default function OrdersPage() {
+    return (
+        <ProtectedRoute>
+            <OrdersContent />
+        </ProtectedRoute>
+    );
 }

@@ -27,36 +27,70 @@ const mem = {
 };
 
 try {
-  if (process.env.REDIS_URL) {
+  if (process.env.REDIS_URL && process.env.REDIS_URL.trim() !== '') {
     const Redis = require('ioredis');
-    redis = new Redis(process.env.REDIS_URL, { maxRetriesPerRequest: 1, lazyConnect: true, connectTimeout: 2000 });
+    const client = new Redis(process.env.REDIS_URL, { maxRetriesPerRequest: 1, lazyConnect: true, connectTimeout: 2000 });
+    client.on('error', () => {
+      // Suppress unhandled redis errors and fallback
+    });
+    redis = client;
   }
 } catch {
-  console.log('Redis not available — using in-memory fallback');
+  // Use in-memory fallback
 }
 
 const store = redis ?? mem;
 
 export async function setOTP(phone: string, otp: string): Promise<void> {
-  await store.set(`otp:${phone}`, otp, 'EX', 300);
+  try {
+    await store.set(`otp:${phone}`, otp, 'EX', 300);
+  } catch {
+    await mem.set(`otp:${phone}`, otp, 'EX', 300);
+  }
 }
 export async function getOTP(phone: string): Promise<string | null> {
-  return store.get(`otp:${phone}`);
+  try {
+    return await store.get(`otp:${phone}`);
+  } catch {
+    return await mem.get(`otp:${phone}`);
+  }
 }
 export async function deleteOTP(phone: string): Promise<void> {
-  await store.del(`otp:${phone}`);
+  try {
+    await store.del(`otp:${phone}`);
+  } catch {
+    await mem.del(`otp:${phone}`);
+  }
 }
 export async function setRefreshToken(userId: string, token: string): Promise<void> {
-  await store.set(`refresh:${userId}`, token, 'EX', 30 * 24 * 60 * 60);
+  try {
+    await store.set(`refresh:${userId}`, token, 'EX', 30 * 24 * 60 * 60);
+  } catch {
+    await mem.set(`refresh:${userId}`, token, 'EX', 30 * 24 * 60 * 60);
+  }
 }
 export async function getRefreshToken(userId: string): Promise<string | null> {
-  return store.get(`refresh:${userId}`);
+  try {
+    return await store.get(`refresh:${userId}`);
+  } catch {
+    return await mem.get(`refresh:${userId}`);
+  }
 }
 export async function deleteRefreshToken(userId: string): Promise<void> {
-  await store.del(`refresh:${userId}`);
+  try {
+    await store.del(`refresh:${userId}`);
+  } catch {
+    await mem.del(`refresh:${userId}`);
+  }
 }
 export async function checkRateLimit(key: string, limit: number, windowSec: number): Promise<boolean> {
-  const current = await store.incr(`rl:${key}`);
-  if (current === 1) await store.expire(`rl:${key}`, windowSec);
-  return current <= limit;
+  try {
+    const current = await store.incr(`rl:${key}`);
+    if (current === 1) await store.expire(`rl:${key}`, windowSec);
+    return current <= limit;
+  } catch {
+    const current = await mem.incr(`rl:${key}`);
+    if (current === 1) await mem.expire(`rl:${key}`, windowSec);
+    return current <= limit;
+  }
 }

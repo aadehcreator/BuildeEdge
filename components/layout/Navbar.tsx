@@ -57,14 +57,29 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
           <div className="flex items-center gap-3 lg:gap-6">
 
+// ... existing code ...
             {/* Logo */}
             <Link href="/" className="flex-shrink-0 flex items-center gap-2 font-heading font-bold text-xl text-secondary">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white text-sm font-bold">BE</div>
-              <span className="hidden sm:block">Build Edge</span>
+              <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm">HR</div>
+              <span className="tracking-tight">Home<span className="text-amber-600">Run</span></span>
             </Link>
+            
+            {/* New Categories */}
+            <div className="hidden xl:flex items-center gap-4 text-sm font-medium text-gray-700">
+              {['Cement', 'Steel Rebars', 'Bricks', 'Sand'].map((cat) => (
+                <Link key={cat} href={`/collections/${cat.toLowerCase()}`} className="hover:text-primary transition-colors">{cat}</Link>
+              ))}
+              {['Power Tools', 'Tiles', 'Paints', 'Plumbing'].map((cat) => (
+                <span key={cat} className="text-gray-400 cursor-not-allowed flex items-center gap-1.5">
+                  {cat}
+                  <span className="text-[9px] bg-gray-100 text-gray-500 px-1 py-0.5 rounded uppercase">Soon</span>
+                </span>
+              ))}
+            </div>
 
             {/* Location */}
             <div className="hidden lg:flex items-center gap-2">
+// ... existing code ...
               <span className="bg-primary text-white text-xs font-semibold px-2.5 py-1 rounded-full">⚡ 60 Mins</span>
               <button onClick={openPincodeModal} className="flex items-center gap-1 text-sm text-muted hover:text-primary transition-colors">
                 <MapPin size={14} className="text-primary" />

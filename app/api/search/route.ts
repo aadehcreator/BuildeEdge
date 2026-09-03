@@ -1,10 +1,12 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import Fuse from 'fuse.js';
 
 export async function GET(req: NextRequest) {
   try {
-    const q = new URL(req.url).searchParams.get('q')?.trim();
+    const q = req.nextUrl.searchParams.get('q')?.trim();
     if (!q || q.length < 1) return NextResponse.json({ results: [], query: q });
 
     // Fetch all active products for Fuse.js search
@@ -34,7 +36,7 @@ export async function GET(req: NextRequest) {
 
     const results = fuse
       .search(q, { limit: 20 })
-      .map(({ item, score, matches }) => ({ ...item, score, matches }));
+      .map(({ item, score, matches }) => ({ ...(item as any), score, matches }));
 
     return NextResponse.json({ results, query: q, total: results.length });
   } catch (error) {

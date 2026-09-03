@@ -1,5 +1,8 @@
 'use client';
+export const dynamic = 'force-dynamic';
+
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { MapPin, Trash2, Star, Loader2, Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -13,7 +16,8 @@ interface Address {
 const LABELS = ['Home', 'Site', 'Office', 'Other'];
 
 export default function AddressesPage() {
-  const { accessToken } = useAuthStore();
+  const router = useRouter();
+  const { accessToken, logout } = useAuthStore();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
   const [addingNew, setAddingNew] = useState(false);
@@ -21,10 +25,19 @@ export default function AddressesPage() {
   const [form, setForm] = useState({ label: 'Home', line1: '', line2: '', pincode: '', city: 'Gwalior' });
 
   const fetchAddresses = async () => {
+    if (!accessToken) {
+      router.push('/login?redirect=/account/addresses');
+      return;
+    }
     try {
       const res = await fetch('/api/account/addresses', {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
+      if (res.status === 401) {
+        logout();
+        router.push('/login?redirect=/account/addresses');
+        return;
+      }
       const data = await res.json() as { addresses: Address[] };
       setAddresses(data.addresses ?? []);
     } finally {

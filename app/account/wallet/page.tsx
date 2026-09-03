@@ -1,7 +1,10 @@
 'use client';
+export const dynamic = 'force-dynamic';
+
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { Wallet, ArrowUp, ArrowDown, Loader2, Info } from 'lucide-react';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 interface WalletTx {
   id: string; amount: number; type: 'CREDIT' | 'DEBIT';
@@ -9,20 +12,23 @@ interface WalletTx {
 }
 interface WalletData { id: string; balance: number; transactions: WalletTx[]; }
 
-export default function WalletPage() {
+function WalletContent() {
   const { accessToken } = useAuthStore();
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!accessToken) return;
+    
     fetch('/api/account/wallet', { headers: { Authorization: `Bearer ${accessToken}` } })
       .then((r) => r.json() as Promise<{ wallet: WalletData }>)
       .then(({ wallet }) => setWallet(wallet))
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, [accessToken]);
 
   return (
-    <div>
+    <div className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="font-heading font-bold text-2xl text-secondary mb-6">Wallet & Cashback</h1>
 
       {loading ? (
@@ -91,4 +97,12 @@ export default function WalletPage() {
       )}
     </div>
   );
+}
+
+export default function WalletPage() {
+    return (
+        <ProtectedRoute>
+            <WalletContent />
+        </ProtectedRoute>
+    );
 }

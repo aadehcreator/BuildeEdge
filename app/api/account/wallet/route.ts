@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth';
+import { requireAuth, ensureUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export async function GET(req: NextRequest) {
   try {
     const user = requireAuth(req);
+    await ensureUser(prisma, user.userId, user.phone);
     const wallet = await prisma.wallet.findUnique({
       where: { userId: user.userId },
       include: {

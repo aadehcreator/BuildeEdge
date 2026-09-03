@@ -1,10 +1,13 @@
 'use client';
+export const dynamic = 'force-dynamic';
+
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Phone, ArrowRight, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Cookies from 'js-cookie';
 import OTPInput from '@/components/auth/OTPInput';
 import { useAuthStore } from '@/store/authStore';
 import { useCartStore } from '@/store/cartStore';
@@ -63,6 +66,7 @@ function LoginContent() {
       });
       const data = await res.json() as { success?: boolean; user?: Parameters<typeof setAuth>[0]; accessToken?: string; refreshToken?: string; error?: string };
       if (!res.ok) throw new Error(data.error ?? 'Invalid OTP');
+      document.cookie = `token=${data.accessToken}; path=/; max-age=86400`;
       setAuth(data.user!, data.accessToken!, data.refreshToken!);
 
       // Merge local cart with server cart

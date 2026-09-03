@@ -55,9 +55,9 @@ export async function GET(req: NextRequest) {
         select: { id: true, name: true, sku: true, stock: true, reorderPoint: true, lowStockThreshold: true, unit: true, images: true, vendor: { select: { businessName: true } } },
       });
 
-      const outOfStock = allProducts.filter(p => p.stock === 0);
-      const critical = allProducts.filter(p => p.stock > 0 && p.stock <= p.lowStockThreshold);
-      const reorder = allProducts.filter(p => p.stock > p.lowStockThreshold && p.stock <= p.reorderPoint);
+      const outOfStock = allProducts.filter((p: any) => p.stock === 0);
+      const critical = allProducts.filter((p: any) => p.stock > 0 && p.stock <= p.lowStockThreshold);
+      const reorder = allProducts.filter((p: any) => p.stock > p.lowStockThreshold && p.stock <= p.reorderPoint);
 
       return NextResponse.json({
         summary: { total: allProducts.length, outOfStock: outOfStock.length, critical: critical.length, reorder: reorder.length },

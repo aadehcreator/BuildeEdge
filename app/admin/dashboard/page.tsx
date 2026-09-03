@@ -99,7 +99,7 @@ export default async function DashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {data.recentOrders.map((order) => (
+                {data.recentOrders.map((order: any) => (
                   <tr key={order.id} className="border-t border-gray-800 hover:bg-gray-800/50 transition-colors">
                     <td className="px-4 py-2.5 text-gray-300 font-mono text-xs">#{order.id.slice(-6).toUpperCase()}</td>
                     <td className="px-4 py-2.5 text-gray-300">{order.user.name ?? order.user.phone}</td>
@@ -127,7 +127,7 @@ export default async function DashboardPage() {
             <div className="p-6 text-center text-gray-500 text-sm">All products well-stocked ✅</div>
           ) : (
             <ul className="divide-y divide-gray-800">
-              {data.lowStockProducts.map((p) => (
+              {data.lowStockProducts.map((p: any) => (
                 <li key={p.sku} className="flex items-center justify-between px-4 py-3">
                   <div>
                     <p className="text-xs text-gray-300 font-medium line-clamp-1">{p.name}</p>

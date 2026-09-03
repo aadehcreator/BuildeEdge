@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Vendor profile already exists', status: existing.status }, { status: 400 });
     }
 
-    const vendor = await prisma.$transaction(async (tx) => {
+    const vendor = await prisma.$transaction(async (tx: any) => {
       const profile = await tx.vendorProfile.create({
         data: { ...parsed.data, userId: user.userId, status: 'PENDING', isActive: false },
       });

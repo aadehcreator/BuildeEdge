@@ -15,18 +15,16 @@ const VENDOR_ONLY = [
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  const token = req.cookies.get("token")?.value;
   const user = getUserFromRequest(req);
 
-  // Already logged in → auth pages se door
-  if (AUTH_PATHS.some((p) => pathname.startsWith(p)) && user) {
-    return NextResponse.redirect(new URL('/', req.url));
+  if (PROTECTED_PATHS.some((p) => pathname.startsWith(p)) && !token) {
+    return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  // Account + checkout ke liye login chahiye
-  if (PROTECTED_PATHS.some((p) => pathname.startsWith(p)) && !user) {
-    const url = new URL('/login', req.url);
-    url.searchParams.set('redirect', pathname);
-    return NextResponse.redirect(url);
+  // Already logged in → auth pages se door
+  if (AUTH_PATHS.some((p) => pathname.startsWith(p)) && token) {
+    return NextResponse.redirect(new URL('/', req.url));
   }
 
   // /vendor/profile → koi bhi logged-in user ja sakta hai (registration ke liye)

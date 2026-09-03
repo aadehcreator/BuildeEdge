@@ -19,7 +19,7 @@ export default async function CollectionsPage() {
       <h1 className="font-heading font-bold text-2xl text-secondary mb-6">All Categories</h1>
 
       <div className="space-y-8">
-        {categories.map((cat) => (
+        {categories.map((cat: any) => (
           <section key={cat.id}>
             <div className="flex items-center justify-between mb-3">
               <Link href={`/collections/${cat.slug}`} className="flex items-center gap-3 group">
@@ -38,7 +38,7 @@ export default async function CollectionsPage() {
 
             {cat.children.length > 0 && (
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                {cat.children.map((sub) => (
+                {cat.children.map((sub: any) => (
                   <Link
                     key={sub.id}
                     href={`/collections/${sub.slug}`}

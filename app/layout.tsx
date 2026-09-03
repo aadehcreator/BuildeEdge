@@ -19,6 +19,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
   title: { default: 'Build Edge — 60 Min Construction Materials Delivery in Gwalior', template: '%s | Build Edge' },
   description: 'Cement, Plywood & Hardware delivered in 60 minutes. Best prices on Asian Paints, Fevicol, Bosch, Hettich & more. Open 8 AM – 8 PM.',
   keywords: ['construction materials', 'cement', 'plywood', 'hardware', 'Gwalior', 'quick delivery'],

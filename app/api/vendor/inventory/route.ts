@@ -19,10 +19,10 @@ export async function GET(req: NextRequest) {
       orderBy: { stock: 'asc' },
     });
 
-    const outOfStock = products.filter((p) => p.stock === 0);
-    const lowStock = products.filter((p) => p.stock > 0 && p.stock <= p.lowStockThreshold);
-    const reorderNeeded = products.filter((p) => p.stock > p.lowStockThreshold && p.stock <= p.reorderPoint);
-    const healthy = products.filter((p) => p.stock > p.reorderPoint);
+    const outOfStock = products.filter((p: any) => p.stock === 0);
+    const lowStock = products.filter((p: any) => p.stock > 0 && p.stock <= p.lowStockThreshold);
+    const reorderNeeded = products.filter((p: any) => p.stock > p.lowStockThreshold && p.stock <= p.reorderPoint);
+    const healthy = products.filter((p: any) => p.stock > p.reorderPoint);
 
     return NextResponse.json({
       summary: {

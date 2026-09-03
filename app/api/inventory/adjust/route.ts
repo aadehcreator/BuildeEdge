@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     const delta = type === 'DAMAGE' || type === 'ADJUSTMENT' && quantity < 0 ? -quantity : quantity;
     const newStock = Math.max(0, product.stock + (type === 'DAMAGE' ? -quantity : delta));
 
-    const log = await prisma.$transaction(async (tx) => {
+    const log = await prisma.$transaction(async (tx: any) => {
       await tx.product.update({ where: { id: productId }, data: { stock: newStock } });
       return tx.stockLog.create({
         data: {

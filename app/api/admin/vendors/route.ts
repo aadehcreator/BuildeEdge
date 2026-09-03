@@ -56,7 +56,7 @@ export async function PATCH(req: NextRequest) {
     }
     if (commissionPct !== undefined) updateData.commissionPct = commissionPct;
 
-    const vendor = await prisma.$transaction(async (tx) => {
+    const vendor = await prisma.$transaction(async (tx: any) => {
       const v = await tx.vendorProfile.update({ where: { id: vendorId }, data: updateData });
 
       // Update user role based on status

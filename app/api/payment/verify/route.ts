@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     if (!order) return NextResponse.json({ error: 'Order not found' }, { status: 404 });
 
     // Update order + credit cashback in transaction
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: any) => {
       await tx.order.update({
         where: { id: orderId },
         data: {

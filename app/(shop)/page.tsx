@@ -37,11 +37,11 @@ async function getHomeData() {
       take: 10,
     }),
   ]);
-  const featuredProducts = rawFeatured.map(p => ({
+  const featuredProducts = rawFeatured.map((p: any) => ({
     ...p,
     bulkPrices: p.bulkPrices as Array<{ minQty: number; price: number }> | null,
   }));
-  const newProducts = rawNew.map(p => ({
+  const newProducts = rawNew.map((p: any) => ({
     ...p,
     bulkPrices: p.bulkPrices as Array<{ minQty: number; price: number }> | null,
   }));
@@ -85,9 +85,9 @@ export default async function HomePage() {
 
       {/* About blurb */}
       <section className="bg-white rounded-2xl border border-gray-100 p-6 text-center">
-        <h2 className="font-heading font-bold text-xl mb-2">Gwalior&apos;s #1 Construction Materials Platform</h2>
+        <h2 className="font-heading font-bold text-xl mb-2">HomeRun · Construction &amp; Building Materials Delivered in 60 Mins</h2>
         <p className="text-sm text-muted max-w-2xl mx-auto">
-          Build Edge brings the hardware store to your doorstep — in 60 minutes. Cement, plywood, paint, electrical, plumbing, tools &amp; more from brands you trust. Serving contractors, builders, and homeowners across Gwalior since 2024.
+          HomeRun brings the hardware store and bulk building materials right to your site. Cement, steel, tiling supplies, paint, waterproofing, plywood, and electricals from 100% genuine brands with transparent wholesale pricing.
         </p>
       </section>
     </div>

@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
 
     const slug = `${parsed.data.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}-${Date.now()}`;
 
-    const product = await prisma.$transaction(async (tx) => {
+    const product = await prisma.$transaction(async (tx: any) => {
       const p = await tx.product.create({
         data: { ...parsed.data, slug, vendorId: vendor.id, isActive: false }, // Admin approve karna padega
       });

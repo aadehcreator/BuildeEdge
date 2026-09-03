@@ -1,10 +1,13 @@
 'use client';
+export const dynamic = 'force-dynamic';
+
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import Image from 'next/image';
 import Link from 'next/link';
 import { CheckCircle, Circle, Loader2, MapPin, Phone } from 'lucide-react';
+import LiveTrackingMap from '@/components/home/LiveTrackingMap';
 
 interface OrderItem { productName: string; productImage: string; quantity: number; price: number; unit: string; mrp: number; }
 interface OrderDetail {
@@ -19,17 +22,30 @@ const STEP_LABELS: Record<string, string> = {
 };
 
 export default function OrderDetailPage() {
+  const router = useRouter();
   const { id } = useParams<{ id: string }>();
-  const { accessToken } = useAuthStore();
+  const { accessToken, logout } = useAuthStore();
   const [order, setOrder] = useState<OrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!accessToken) {
+      router.push(`/login?redirect=/account/orders/${id}`);
+      return;
+    }
     fetch(`/api/orders/${id}`, { headers: { Authorization: `Bearer ${accessToken}` } })
-      .then((r) => r.json() as Promise<{ order: OrderDetail }>)
+      .then((r) => {
+        if (r.status === 401) {
+          logout();
+          router.push(`/login?redirect=/account/orders/${id}`);
+          throw new Error('Unauthorized');
+        }
+        return r.json() as Promise<{ order: OrderDetail }>;
+      })
       .then(({ order }) => setOrder(order))
+      .catch(() => {})
       .finally(() => setLoading(false));
-  }, [id, accessToken]);
+  }, [id, accessToken, logout, router]);
 
   if (loading) return <div className="flex justify-center py-12"><Loader2 size={28} className="animate-spin text-primary" /></div>;
   if (!order) return <div className="text-center py-12"><p className="text-muted">Order not found</p><Link href="/account/orders" className="btn-primary text-sm mt-4 inline-block">Back to Orders</Link></div>;
@@ -77,6 +93,8 @@ export default function OrderDetailPage() {
           )}
         </div>
       )}
+      
+      <LiveTrackingMap status={order.status} />
 
       {/* Items */}
       <div className="bg-white rounded-2xl border border-gray-100 p-5">

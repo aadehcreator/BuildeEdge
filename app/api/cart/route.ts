@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
@@ -26,7 +28,7 @@ export async function GET(req: NextRequest) {
     if (!cart) return NextResponse.json({ items: [] });
 
     // Filter out inactive products
-    const validItems = cart.items.filter((item) => item.product.isActive && item.product.stock > 0);
+    const validItems = cart.items.filter((item: any) => item.product.isActive && item.product.stock > 0);
     return NextResponse.json({ items: validItems });
   } catch (error) {
     if (error instanceof Error && error.message === 'UNAUTHORIZED') {
@@ -114,7 +116,7 @@ export async function PATCH(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   try {
     const user = requireAuth(req);
-    const productId = new URL(req.url).searchParams.get('productId');
+    const productId = req.nextUrl.searchParams.get('productId');
 
     const cart = await prisma.cart.findUnique({ where: { userId: user.userId } });
     if (!cart) return NextResponse.json({ error: 'Cart not found' }, { status: 404 });

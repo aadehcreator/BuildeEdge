@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth';
+import { requireAuth, ensureUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { CreateOrderSchema } from '@/lib/validators';
 
@@ -16,6 +16,7 @@ function getBulkPrice(sellingPrice: number, bulkPrices: unknown, qty: number): n
 export async function GET(req: NextRequest) {
   try {
     const user = requireAuth(req);
+    await ensureUser(prisma, user.userId, user.phone);
     const { searchParams } = new URL(req.url);
     const page = Math.max(1, Number(searchParams.get('page') ?? 1));
     const limit = Math.min(20, Number(searchParams.get('limit') ?? 10));
@@ -43,6 +44,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const user = requireAuth(req);
+    await ensureUser(prisma, user.userId, user.phone);
     const body = await req.json() as unknown;
     const parsed = CreateOrderSchema.safeParse(body);
     if (!parsed.success) return NextResponse.json({ error: parsed.error.errors[0].message }, { status: 400 });
@@ -69,7 +71,7 @@ export async function POST(req: NextRequest) {
 
     // Validate stock and calculate totals
     let subtotal = 0;
-    const orderItems = cart.items.map((item) => {
+    const orderItems = cart.items.map((item: any) => {
       if (item.product.stock < item.quantity) throw new Error(`Insufficient stock for ${item.product.name}`);
       const price = getBulkPrice(item.product.sellingPrice, item.product.bulkPrices, item.quantity);
       subtotal += price * item.quantity;
@@ -104,7 +106,7 @@ export async function POST(req: NextRequest) {
     };
 
     // Create order in transaction
-    const order = await prisma.$transaction(async (tx) => {
+    const order = await prisma.$transaction(async (tx: any) => {
       const newOrder = await tx.order.create({
         data: {
           userId: user.userId,

@@ -1,6 +1,7 @@
 {
-  "name": "Build Edge",
-  "description": "Gwalior's fastest construction materials platform delivering cement, plywood, paint, and hardware in 60 minutes.",
+  "name": "HomeRun",
+  "description": "Fastest construction and building materials delivery platform delivering cement, plywood, paint, and hardware in 60 minutes.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
+

@@ -4,15 +4,15 @@
 
 @layer base {
   :root {
-    --primary: #E87722;
-    --primary-dark: #C45E00;
-    --secondary: #1A1A1A;
-    --accent: #16A34A;
-    --surface: #F5F5F5;
+    --primary: #D97706; /* Rich Amber-Yellow / Construction Gold */
+    --primary-dark: #B45309;
+    --secondary: #1F2937;
+    --accent: #059669;
+    --surface: #FFFBEB; /* Soft warm light amber cream background */
     --card: #FFFFFF;
-    --border: #E5E7EB;
+    --border: #FDE68A;
     --muted: #6B7280;
-    --background: 0 0% 96%;
+    --background: 0 0% 98%;
     --foreground: 0 0% 10%;
     --radius: 0.75rem;
   }
@@ -20,7 +20,7 @@
   * { @apply border-border; }
 
   body {
-    @apply bg-surface text-secondary font-sans antialiased;
+    @apply bg-surface text-gray-900 font-sans antialiased;
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -30,9 +30,9 @@
 
   /* Custom scrollbar */
   ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: #f1f1f1; }
-  ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+  ::-webkit-scrollbar-track { background: #FEF3C7; }
+  ::-webkit-scrollbar-thumb { background: #F59E0B; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #D97706; }
 }
 
 @layer components {
