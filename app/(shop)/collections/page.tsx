@@ -6,9 +6,9 @@ export const dynamic = 'force-dynamic';
 
 export default async function CollectionsPage() {
   const categories = await prisma.category.findMany({
-    where: { isActive: true, parentId: null },
+    where: { is_active: true, parent_id: null },
     include: {
-      children: { where: { isActive: true }, orderBy: { sortOrder: 'asc' } },
+      children: { where: { is_active: true }, orderBy: { sortOrder: 'asc' } },
       _count: { select: { products: true } },
     },
     orderBy: { sortOrder: 'asc' },
