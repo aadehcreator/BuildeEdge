@@ -28,7 +28,6 @@ async function getHomeData() {
     prisma.product.findMany({
       where: { isActive: true },
       include: {
-        brand: { select: { name: true } },
         category: { select: { name: true, slug: true } },
       },
       orderBy: { createdAt: 'desc' },
