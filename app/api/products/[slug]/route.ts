@@ -9,7 +9,7 @@ export async function GET(
     const product = await prisma.product.findUnique({
       where: { slug: params.slug, isActive: true },
       include: {
-        category: { select: { id: true, name: true, slug: true, parent_id: true, parent: { select: { name: true, slug: true } } } },
+        category: { select: { id: true, name: true, slug: true, parentId: true, parent: { select: { name: true, slug: true } } } },
         brand: { select: { id: true, name: true, slug: true, logo: true } },
       },
     });
