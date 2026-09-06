@@ -9,7 +9,7 @@ export default function AppDownloadBanner() {
           <span className="text-sm font-semibold text-primary">Coming Soon — Android & iOS</span>
         </div>
         <h2 className="font-heading font-bold text-2xl md:text-3xl mb-2">
-          Order on the go with the Build Edge App
+          Order on the go with the BuildeHive Store App
         </h2>
         <p className="text-gray-300 text-sm md:text-base mb-6">
           Track deliveries live, get exclusive app-only deals, and reorder in one tap. Built for contractors and builders.

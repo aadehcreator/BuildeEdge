@@ -43,7 +43,7 @@ export default function BecomeVendorPage() {
           Vendor Partner Program
         </span>
         <h1 className="font-heading font-bold text-4xl md:text-5xl text-secondary mb-4 leading-tight">
-          Sell Construction Materials<br />on Build Edge
+          Sell Construction Materials<br />on BuildeHive Store
         </h1>
         <p className="text-muted text-lg max-w-xl mx-auto mb-8">
           Join Gwalior&apos;s fastest-growing construction platform. Zero setup cost. Real-time inventory. Weekly payouts.
@@ -79,7 +79,7 @@ export default function BecomeVendorPage() {
       {/* Perks */}
       <section>
         <h2 className="font-heading font-bold text-2xl text-secondary text-center mb-8">
-          Why Sell on Build Edge?
+          Why Sell on BuildeHive Store?
         </h2>
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
           {PERKS.map((perk) => (

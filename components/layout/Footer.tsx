@@ -29,7 +29,7 @@ export default function Footer() {
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-sm">BE</div>
-              <span className="font-heading font-bold text-lg">Build Edge</span>
+              <span className="font-heading font-bold text-lg">BuildeHive Store</span>
             </div>
             <p className="text-sm text-gray-400 mb-4 leading-relaxed">
               Gwalior&apos;s fastest construction materials platform. Cement, Plywood & Hardware delivered in 60 minutes.
@@ -114,7 +114,7 @@ export default function Footer() {
 
         <div className="border-t border-gray-700 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-gray-500">
-            © {new Date().getFullYear()} Build Edge. All rights reserved. Open 8 AM – 8 PM · All Days
+            © {new Date().getFullYear()} BuildeHive Store. All rights reserved. Open 8 AM – 8 PM · All Days
           </p>
           <div className="flex items-center gap-3 text-gray-500">
             <span className="text-xs">We accept:</span>

@@ -1,6 +1,6 @@
-# Build Edge
+# BuildeHive Store
 
-Build Edge is a Next.js 14 application for construction-material ordering, vendor management, inventory, payments, and delivery workflows.
+BuildeHive Store is a Next.js 14 application for construction-material ordering, vendor management, inventory, payments, and delivery workflows.
 
 ## Requirements
 

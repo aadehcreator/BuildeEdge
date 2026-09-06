@@ -50,7 +50,7 @@ function WalletContent() {
             <div className="relative z-10">
               <div className="flex items-center gap-2 mb-1">
                 <Wallet size={18} />
-                <span className="text-sm font-medium opacity-90">Build Edge Wallet</span>
+                <span className="text-sm font-medium opacity-90">BuildeHive Store Wallet</span>
               </div>
               <p className="text-4xl font-bold mt-2">₹{(wallet?.balance ?? 0).toFixed(2)}</p>
               <p className="text-sm opacity-80 mt-1">Available balance</p>

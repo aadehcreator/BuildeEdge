@@ -34,7 +34,7 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData): Promise<
   const html = `
     <div style="font-family:Inter,sans-serif;max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,0.1)">
       <div style="background:#E87722;padding:24px 32px;text-align:center">
-        <h1 style="color:#fff;margin:0;font-size:24px">Build Edge</h1>
+        <h1 style="color:#fff;margin:0;font-size:24px">BuildeHive Store</h1>
         <p style="color:rgba(255,255,255,0.9);margin:4px 0 0">Order Confirmed! 🎉</p>
       </div>
       <div style="padding:32px">
@@ -67,15 +67,15 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData): Promise<
         <p style="color:#555;margin-top:24px">Need help? WhatsApp us at <a href="https://wa.me/918109585179" style="color:#E87722">+91 8109585179</a></p>
       </div>
       <div style="background:#f5f5f5;padding:16px;text-align:center">
-        <p style="color:#999;font-size:12px;margin:0">© 2024 Build Edge · Gwalior · Open 8 AM – 8 PM</p>
+        <p style="color:#999;font-size:12px;margin:0">© 2024 BuildeHive Store · Gwalior · Open 8 AM – 8 PM</p>
       </div>
     </div>
   `;
 
   await transporter.sendMail({
-    from: `"Build Edge" <${process.env.SMTP_USER}>`,
+    from: `"BuildeHive Store" <${process.env.SMTP_USER}>`,
     to: data.to,
-    subject: `Order Confirmed #${data.orderId.slice(-8).toUpperCase()} — Build Edge`,
+    subject: `Order Confirmed #${data.orderId.slice(-8).toUpperCase()} — BuildeHive Store`,
     html,
   });
 }

@@ -45,7 +45,7 @@ export default function VendorDashboard() {
           <Package size={28} className="text-primary" />
         </div>
         <h1 className="font-heading font-bold text-2xl text-white mb-2">Become a Vendor</h1>
-        <p className="text-gray-400 mb-6">Register your business to sell on Build Edge and reach thousands of contractors in Gwalior.</p>
+        <p className="text-gray-400 mb-6">Register your business to sell on BuildeHive Store and reach thousands of contractors in Gwalior.</p>
         <Link href="/vendor/profile" className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary-dark transition-colors">
           Register Your Business <ArrowRight size={16} />
         </Link>

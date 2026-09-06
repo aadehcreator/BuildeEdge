@@ -196,7 +196,7 @@ export default function VendorProfilePage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="font-heading font-bold text-2xl text-white">{vendor ? 'Vendor Profile' : 'Register as Vendor'}</h1>
-          <p className="text-gray-400 text-sm mt-1">{vendor ? 'Update your business information' : 'Fill in your business details to start selling on Build Edge'}</p>
+          <p className="text-gray-400 text-sm mt-1">{vendor ? 'Update your business information' : 'Fill in your business details to start selling on BuildeHive Store'}</p>
         </div>
         {!vendor && (
           <button

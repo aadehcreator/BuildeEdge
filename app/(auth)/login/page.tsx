@@ -159,7 +159,7 @@ function LoginContent() {
         if (cartData.items) mergeWithServerCart(cartData.items);
       } catch { /* silent */ }
 
-      toast.success('Welcome to Build Edge! 🎉');
+      toast.success('Welcome to BuildeHive Store! 🎉');
       router.push(redirect);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Verification failed');
@@ -178,7 +178,7 @@ function LoginContent() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 font-heading font-bold text-2xl text-secondary">
             <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white font-bold">BE</div>
-            Build Edge
+            BuildeHive Store
           </Link>
           <p className="text-sm text-muted mt-2">Gwalior&apos;s fastest construction store</p>
         </div>

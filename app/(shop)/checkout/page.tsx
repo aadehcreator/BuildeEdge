@@ -105,7 +105,7 @@ export default function CheckoutPage() {
         amount: payData.amount,
         currency: payData.currency,
         order_id: payData.razorpayOrderId,
-        name: 'Build Edge',
+        name: 'BuildeHive Store',
         description: 'Construction Materials Order',
         prefill: { name: user?.name ?? '', contact: user?.phone ?? '' },
         theme: { color: '#E87722' },
