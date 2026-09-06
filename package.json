@@ -13,7 +13,7 @@
     "db:push": "npx prisma db push",
     "db:migrate": "npx prisma migrate dev --name init",
     "db:generate": "npx prisma generate",
-    "db:seed": "npx ts-node --skip-project --transpile-only --compiler-options \"{\\\"module\\\":\\\"CommonJS\\\",\\\"moduleResolution\\\":\\\"node\\\",\\\"target\\\":\\\"ES2020\\\"}\" prisma/seed-current.ts",
+    "db:seed": "npx ts-node --skip-project --transpile-only --compiler-options \"{\\\"module\\\":\\\"CommonJS\\\",\\\"moduleResolution\\\":\\\"node\\\",\\\"target\\\":\\\"ES2020\\\"}\" prisma/seed.ts",
     "db:studio": "npx prisma studio"
   },
   "dependencies": {
