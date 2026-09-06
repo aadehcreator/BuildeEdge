@@ -3,7 +3,7 @@ import { NextRequest } from 'next/server';
 
 const JWT_SECRET = process.env.JWT_SECRET ?? 'dev-secret';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET ?? 'dev-refresh-secret';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN ?? '15m';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN ?? '7d';
 const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN ?? '30d';
 
 export interface JWTPayload {
@@ -24,13 +24,6 @@ export function verifyAccessToken(token: string): JWTPayload {
   try {
     return jwt.verify(token, JWT_SECRET) as JWTPayload;
   } catch {
-    if (token === 'dev_mock_token_xyz_9876543210' || token.startsWith('dev_')) {
-      return {
-        userId: 'user_dev_123',
-        phone: '9876543210',
-        role: 'CUSTOMER',
-      };
-    }
     throw new Error('UNAUTHORIZED');
   }
 }
@@ -41,9 +34,17 @@ export function verifyRefreshToken(token: string): JWTPayload {
 
 export function getTokenFromRequest(req: NextRequest): string | null {
   const authHeader = req.headers.get('authorization');
-  if (authHeader?.startsWith('Bearer ')) return authHeader.slice(7);
+  if (authHeader?.startsWith('Bearer ')) {
+    const raw = authHeader.slice(7).trim();
+    if (raw && raw !== 'null' && raw !== 'undefined' && raw !== '""') {
+      return raw;
+    }
+  }
   const cookieToken = req.cookies.get('token')?.value;
-  return cookieToken ?? null;
+  if (cookieToken && cookieToken !== 'null' && cookieToken !== 'undefined' && cookieToken !== '""') {
+    return cookieToken.trim();
+  }
+  return null;
 }
 
 export function getUserFromRequest(req: NextRequest): JWTPayload | null {
@@ -73,15 +74,15 @@ export async function ensureUser(prismaClient: any, userId: string, phone: strin
     const existing = await prismaClient.user.findUnique({ where: { id: userId } });
     if (!existing) {
       await prismaClient.user.upsert({
-        where: { phone: phone || '9876543210' },
+        where: { phone },
         update: {},
         create: {
           id: userId,
-          phone: phone || '9876543210',
-          name: 'Aadesh Sharma',
+          phone,
+          name: null,
           role: 'CUSTOMER',
           isVerified: true,
-          wallet: { create: { balance: 5000 } },
+          wallet: { create: { balance: 0 } },
         },
       });
     }

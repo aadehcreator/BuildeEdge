@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
 const AdjustSchema = z.object({
-  productId: z.string().cuid(),
+  productId: z.string().min(1, 'Product ID is required'),
   type: z.enum(['STOCK_IN', 'ADJUSTMENT', 'RETURN', 'DAMAGE']),
   quantity: z.number().int().min(1),
   reason: z.string().min(3),

@@ -6,6 +6,7 @@ import { ShoppingCart, Plus, Minus, Zap } from 'lucide-react';
 import { useState } from 'react';
 import { useCart } from '@/hooks/useCart';
 import { CartProduct, getEffectivePrice } from '@/store/cartStore';
+import { DEFAULT_PRODUCT_IMAGE } from '@/lib/constants';
 
 interface ProductCardProps {
   product: {
@@ -19,7 +20,7 @@ interface ProductCardProps {
     stock: number;
     cashbackPercent: number;
     bulkPrices?: Array<{ minQty: number; price: number }> | null;
-    category?: { name: string; slug: string };
+    category?: { name: string; slug?: string } | null;
     brand?: { name: string } | null;
     isFeatured?: boolean;
     isNewLaunch?: boolean;
@@ -67,7 +68,7 @@ export default function ProductCard({ product, className = '' }: ProductCardProp
       {/* Image */}
       <Link href={`/products/${product.slug}`} className="relative block overflow-hidden rounded-t-xl bg-gray-50 aspect-square">
         <Image
-          src={product.images[0] ?? 'https://placehold.co/400x400?text=Product'}
+          src={product.images[0] ?? DEFAULT_PRODUCT_IMAGE}
           alt={product.name}
           fill
           className="object-contain p-3 group-hover:scale-105 transition-transform duration-300"
@@ -91,11 +92,14 @@ export default function ProductCard({ product, className = '' }: ProductCardProp
 
       {/* Info */}
       <div className="flex flex-col flex-1 p-3">
-        {product.brand && (
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-muted mb-0.5">
-            {product.brand.name}
-          </p>
-        )}
+        <div className="flex items-center justify-between gap-1 mb-0.5">
+          {product.brand && (
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted truncate">
+              {product.brand.name}
+            </p>
+          )}
+          {/* Clean product card header */}
+        </div>
         <Link href={`/products/${product.slug}`}>
           <h3 className="text-sm font-semibold text-secondary line-clamp-2 leading-snug hover:text-primary transition-colors mb-1">
             {product.name}
@@ -122,15 +126,24 @@ export default function ProductCard({ product, className = '' }: ProductCardProp
 
         {/* Price row */}
         <div className="mt-auto">
-          <div className="flex items-baseline gap-1.5 mb-2">
-            <span className="text-base font-bold text-secondary">
-              ₹{effectivePrice.toLocaleString('en-IN')}
-            </span>
-            {product.mrp > effectivePrice && (
-              <span className="text-xs text-muted line-through">
-                ₹{product.mrp.toLocaleString('en-IN')}
+          <div className="flex items-baseline justify-between gap-1.5 mb-2">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-base font-bold text-secondary">
+                ₹{effectivePrice.toLocaleString('en-IN')}
               </span>
-            )}
+              {product.mrp > effectivePrice && (
+                <span className="text-xs text-muted line-through">
+                  ₹{product.mrp.toLocaleString('en-IN')}
+                </span>
+              )}
+            </div>
+            <Link
+              href={`/products/${product.slug}`}
+              className="text-[11px] font-semibold text-primary hover:underline inline-flex items-center gap-0.5"
+            >
+              <span>विवरण</span>
+              <span>→</span>
+            </Link>
           </div>
 
           {/* Add / Stepper */}

@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdmin } from '@/lib/auth';
+import { requireAuth } from '@/lib/auth';
 import { uploadToCloudinary } from '@/lib/cloudinary';
 
 export async function POST(req: NextRequest) {
   try {
-    requireAdmin(req);
+    const user = requireAuth(req);
+    if (user.role !== 'ADMIN' && user.role !== 'VENDOR') {
+      return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 });
+    }
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
     if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 });

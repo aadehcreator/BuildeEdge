@@ -25,39 +25,39 @@ interface AuthState {
   setLoading: (loading: boolean) => void;
 }
 
-const defaultUser: AuthUser = {
-  id: 'user_dev_123',
-  phone: '+919876543210',
-  name: 'Aadesh Sharma (Contractor)',
-  email: 'aadeshgwl89@gmail.com',
-  avatar: null,
-  role: 'CUSTOMER',
-  isVerified: true,
-  wallet: { balance: 5000 },
-};
+function setAuthCookies(token: string) {
+  if (typeof document === 'undefined') return;
+  document.cookie = `token=${token}; path=/; max-age=604800; SameSite=None; Secure`;
+  document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax`;
+}
 
-const defaultToken = 'dev_mock_token_xyz_9876543210';
+function clearAuthCookies() {
+  if (typeof document === 'undefined') return;
+  document.cookie = 'token=; path=/; max-age=0; SameSite=None; Secure';
+  document.cookie = 'token=; path=/; max-age=0';
+}
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
-      user: defaultUser,
-      accessToken: Cookies.get('token') ?? null,
+      user: null,
+      accessToken: null,
       refreshToken: null,
       isLoading: false,
 
       setAuth: (user: AuthUser, accessToken: string, refreshToken: string) => {
+        setAuthCookies(accessToken);
         set({ user, accessToken, refreshToken });
       },
 
       updateUser: (updates: Partial<AuthUser>) => {
         set((state: AuthState) => ({
-          user: state.user ? { ...state.user, ...updates } : defaultUser,
+          user: state.user ? { ...state.user, ...updates } : null,
         }));
       },
 
       logout: () => {
-        Cookies.remove('token');
+        clearAuthCookies();
         set({ user: null, accessToken: null, refreshToken: null });
       },
 
@@ -66,15 +66,22 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'buildedge-auth',
       merge: (persistedState: any, currentState: any) => {
+        const token = persistedState?.accessToken || (typeof document !== 'undefined' ? Cookies.get('token') : null) || null;
+        if (token) {
+          setAuthCookies(token);
+        }
         return {
           ...currentState,
           ...persistedState,
-          user: persistedState?.user?.id ? persistedState.user : defaultUser,
-          accessToken: persistedState?.accessToken ? persistedState.accessToken : defaultToken,
+          user: persistedState?.user?.id ? persistedState.user : null,
+          accessToken: token,
+          refreshToken: persistedState?.refreshToken ?? null,
         };
       },
       partialize: (state) => ({
         user: state.user,
+        accessToken: state.accessToken,
+        refreshToken: state.refreshToken,
       }),
     }
   )

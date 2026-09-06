@@ -2,6 +2,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import Image from 'next/image';
+import { DEFAULT_PRODUCT_IMAGE } from '@/lib/constants';
 import { AlertTriangle, TrendingUp, Package, CheckCircle, Loader2, Plus, Minus, History } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -276,7 +277,7 @@ function ProductTable({ products, onAdjust }: { products: InventoryProduct[]; on
             <td className="px-4 py-2.5">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-gray-700 overflow-hidden flex-shrink-0">
-                  <Image src={p.images[0] ?? 'https://placehold.co/32x32?text=?'} alt={p.name} width={32} height={32} className="w-full h-full object-contain p-0.5" />
+                  <Image src={p.images[0] ?? DEFAULT_PRODUCT_IMAGE} alt={p.name} width={32} height={32} className="w-full h-full object-contain p-0.5" />
                 </div>
                 <div>
                   <p className="text-gray-200 text-xs font-medium line-clamp-1">{p.name}</p>

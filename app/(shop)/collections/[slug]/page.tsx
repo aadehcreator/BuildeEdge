@@ -1,9 +1,12 @@
 'use client';
-import { useEffect, useState, useCallback } from 'react';
+export const dynamic = 'force-dynamic';
+
+import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { SlidersHorizontal, ChevronDown, X, Loader2 } from 'lucide-react';
 import ProductGrid from '@/components/product/ProductGrid';
+import ProductSkeleton from '@/components/product/ProductSkeleton';
 
 interface Product {
   id: string; name: string; slug: string; images: string[];
@@ -21,7 +24,7 @@ const SORTS = [
   { value: 'name', label: 'Name: A-Z' },
 ];
 
-export default function CollectionPage() {
+function CollectionContent() {
   const { slug } = useParams<{ slug: string }>();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -30,7 +33,9 @@ export default function CollectionPage() {
   const [loading, setLoading] = useState(true);
   const [sort, setSort] = useState('createdAt');
   const [page, setPage] = useState(1);
-  const [categoryName, setCategoryName] = useState('');
+  const formattedCategoryName = slug
+    ? slug.split('-').map((w) => w[0].toUpperCase() + w.slice(1)).join(' ')
+    : '';
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
@@ -39,12 +44,8 @@ export default function CollectionPage() {
       if (searchParams.get('new')) params.set('new', 'true');
       const res = await fetch(`/api/products?${params}`);
       const data = await res.json() as { products: Product[]; pagination: Pagination };
-      setProducts(data.products);
-      setPagination(data.pagination);
-      if (data.products[0]) {
-        // Derive category name from slug
-        setCategoryName(slug.split('-').map((w) => w[0].toUpperCase() + w.slice(1)).join(' '));
-      }
+      setProducts(data.products || []);
+      setPagination(data.pagination || null);
     } finally {
       setLoading(false);
     }
@@ -58,9 +59,9 @@ export default function CollectionPage() {
       <div className="flex items-center gap-2 mb-2 text-xs text-muted">
         <Link href="/" className="hover:text-primary">Home</Link>
         <span>›</span>
-        <span className="text-secondary">{categoryName}</span>
+        <span className="text-secondary">{formattedCategoryName}</span>
       </div>
-      <h1 className="font-heading font-bold text-2xl text-secondary mb-1">{categoryName}</h1>
+      <h1 className="font-heading font-bold text-2xl text-secondary mb-1">{formattedCategoryName}</h1>
       {pagination && <p className="text-sm text-muted mb-4">{pagination.total} products</p>}
 
       {/* Toolbar */}
@@ -82,12 +83,12 @@ export default function CollectionPage() {
 
       {/* Grid */}
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 size={32} className="animate-spin text-primary" />
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 8 }).map((_, i) => <ProductSkeleton key={i} />)}
         </div>
       ) : (
         <>
-          <ProductGrid products={products} columns={4} emptyMessage={`No products in ${categoryName} yet`} />
+          <ProductGrid products={products} columns={4} emptyMessage={`No products in ${formattedCategoryName} yet`} />
 
           {/* Pagination */}
           {pagination && pagination.pages > 1 && (
@@ -118,5 +119,19 @@ export default function CollectionPage() {
         </>
       )}
     </div>
+  );
+}
+
+export default function CollectionPage() {
+  return (
+    <Suspense fallback={
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 8 }).map((_, i) => <ProductSkeleton key={i} />)}
+        </div>
+      </div>
+    }>
+      <CollectionContent />
+    </Suspense>
   );
 }

@@ -10,22 +10,33 @@ interface OTPInputProps {
 
 export default function OTPInput({ value, onChange, length = 6, disabled = false }: OTPInputProps) {
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
-  const digits = value.split('').concat(Array(length).fill('')).slice(0, length);
+  // Always maintain an exact length array
+  const rawDigits = value.split('');
+  const digits = Array.from({ length }, (_, i) => rawDigits[i] || '');
 
   const focus = (i: number) => inputs.current[i]?.focus();
 
   const handleChange = (i: number, ch: string) => {
     const d = ch.replace(/\D/g, '').slice(-1);
-    const next = digits.slice();
+    const next = [...digits];
     next[i] = d;
-    onChange(next.join(''));
+    onChange(next.join('').trimEnd());
     if (d && i < length - 1) focus(i + 1);
   };
 
   const handleKey = (i: number, e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace') {
-      if (digits[i]) { const n = digits.slice(); n[i] = ''; onChange(n.join('')); }
-      else if (i > 0) { focus(i - 1); }
+      if (digits[i]) { 
+        const n = [...digits]; 
+        n[i] = ''; 
+        onChange(n.join('').trimEnd()); 
+      }
+      else if (i > 0) { 
+        focus(i - 1); 
+        const n = [...digits];
+        n[i - 1] = '';
+        onChange(n.join('').trimEnd());
+      }
     } else if (e.key === 'ArrowLeft' && i > 0) focus(i - 1);
     else if (e.key === 'ArrowRight' && i < length - 1) focus(i + 1);
   };
@@ -33,7 +44,7 @@ export default function OTPInput({ value, onChange, length = 6, disabled = false
   const handlePaste = (e: ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
     const paste = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, length);
-    onChange(paste.padEnd(length, '').slice(0, length));
+    onChange(paste);
     focus(Math.min(paste.length, length - 1));
   };
 

@@ -32,7 +32,7 @@ async function getDashboardData() {
     }),
   ]);
 
-  return { totalOrders, todayOrders, monthRevenue: monthRevenue._sum.total ?? 0, totalRevenue: totalRevenue._sum.total ?? 0, pendingOrders, deliveredToday, totalProducts, totalUsers, recentOrders, lowStockProducts };
+  return { totalOrders, todayOrders, monthRevenue: monthRevenue?._sum?.total ?? 0, totalRevenue: totalRevenue?._sum?.total ?? 0, pendingOrders, deliveredToday, totalProducts, totalUsers, recentOrders, lowStockProducts };
 }
 
 const STATUS_COLORS: Record<string, string> = {

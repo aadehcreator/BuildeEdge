@@ -11,6 +11,15 @@ const nextConfig = {
   experimental: {
     serverActions: { allowedOrigins: ['localhost:3000'] },
   },
+  async redirects() {
+    return [
+      {
+        source: '/orders',
+        destination: '/account/orders',
+        permanent: false,
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;

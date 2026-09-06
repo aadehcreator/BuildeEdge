@@ -5,6 +5,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Search, Loader2 } from 'lucide-react';
 import ProductGrid from '@/components/product/ProductGrid';
+import ProductSkeleton from '@/components/product/ProductSkeleton';
 
 interface SearchResult {
   id: string; name: string; slug: string; images: string[];
@@ -48,8 +49,8 @@ function SearchContent() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 size={32} className="animate-spin text-primary" />
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 8 }).map((_, i) => <ProductSkeleton key={i} />)}
         </div>
       ) : (
         <ProductGrid

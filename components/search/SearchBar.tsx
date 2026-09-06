@@ -37,9 +37,9 @@ export default function SearchBar() {
 
   return (
     <form onSubmit={handleSubmit} className="relative w-full">
-      <div className={`flex items-center bg-surface border-2 rounded-xl transition-all duration-200 ${isFocused ? 'border-primary bg-white shadow-sm' : 'border-transparent'}`}>
+      <div className={`flex items-center bg-gray-50 border rounded-xl transition-all duration-200 ${isFocused ? 'border-primary bg-white shadow-xs ring-1 ring-primary/20' : 'border-gray-200 hover:border-gray-300'}`}>
         <Search size={16} className="ml-3 text-muted flex-shrink-0" />
-        <div className="relative flex-1">
+        <div className="relative flex-1 min-w-0">
           <input
             ref={inputRef}
             type="search"
@@ -47,7 +47,7 @@ export default function SearchBar() {
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
-            className="w-full bg-transparent px-3 py-2.5 text-sm focus:outline-none text-secondary placeholder-transparent"
+            className="w-full bg-transparent px-3 py-2 text-sm focus:outline-none text-secondary placeholder-transparent"
             placeholder={PLACEHOLDERS[placeholderIdx]}
           />
           {/* Animated placeholder when empty and not focused */}
@@ -59,7 +59,7 @@ export default function SearchBar() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.25 }}
-                className="absolute inset-0 flex items-center px-3 text-sm text-muted pointer-events-none select-none"
+                className="absolute inset-0 flex items-center px-3 text-sm text-muted pointer-events-none select-none truncate"
               >
                 {PLACEHOLDERS[placeholderIdx]}
               </motion.span>
@@ -67,13 +67,13 @@ export default function SearchBar() {
           )}
         </div>
         {query && (
-          <button type="button" onClick={() => setQuery('')} className="p-1 mr-1 text-muted hover:text-secondary">
+          <button type="button" onClick={() => setQuery('')} className="p-1 mr-1 text-muted hover:text-secondary flex-shrink-0">
             <X size={14} />
           </button>
         )}
         <button
           type="submit"
-          className="mr-1.5 px-3 py-1.5 bg-primary text-white text-xs font-semibold rounded-lg hover:bg-primary-dark transition-colors"
+          className="mr-1.5 px-3 py-1.5 bg-primary text-white text-xs font-semibold rounded-lg hover:bg-primary-dark transition-colors flex-shrink-0 whitespace-nowrap"
         >
           Search
         </button>

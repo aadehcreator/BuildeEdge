@@ -1,4 +1,5 @@
 'use client';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShoppingBag, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
@@ -8,8 +9,15 @@ import CartItemRow from './CartItem';
 import CartSummary from './CartSummary';
 
 export default function CartDrawer() {
+  const [mounted, setMounted] = useState(false);
   const { isOpen, items, closeCart } = useCartStore();
   const { totals } = useCart();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
 
   return (
     <AnimatePresence>

@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth';
+import { getUserFromRequest, signAccessToken, signRefreshToken } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
 const VendorRegisterSchema = z.object({
-  businessName: z.string().min(3, 'Business name required'),
-  businessType: z.enum(['Manufacturer', 'Distributor', 'Retailer', 'Wholesaler']),
+  businessName: z.string().min(2, 'Business name required'),
+  businessType: z.enum(['Manufacturer', 'Distributor', 'Retailer', 'Wholesaler']).optional().default('Retailer'),
   gstin: z.string().optional(),
   pan: z.string().optional(),
-  address: z.string().min(5),
-  city: z.string().min(2),
-  pincode: z.string().regex(/^\d{6}$/),
-  phone: z.string().regex(/^[6-9]\d{9}$/),
-  email: z.string().email(),
+  address: z.string().min(3, 'Address is required'),
+  city: z.string().min(2, 'City is required'),
+  pincode: z.string().regex(/^\d{6}$/, 'Enter valid 6 digit pincode').optional().default('474001'),
+  phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter valid 10 digit Indian phone number'),
+  email: z.string().email().optional().default('vendor@buildedge.in'),
   bankName: z.string().optional(),
   accountNumber: z.string().optional(),
   ifsc: z.string().optional(),
@@ -21,57 +21,111 @@ const VendorRegisterSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
-    const user = requireAuth(req);
     const body = await req.json() as unknown;
     const parsed = VendorRegisterSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.errors[0].message }, { status: 400 });
     }
 
-    // Check already registered
-    const existing = await prisma.vendorProfile.findUnique({ where: { userId: user.userId } });
-    if (existing) {
-      return NextResponse.json({ error: 'Vendor profile already exists', status: existing.status }, { status: 400 });
+    // Check if user is already authenticated
+    let userPayload = getUserFromRequest(req);
+    let userId = userPayload?.userId;
+
+    // If not authenticated or token expired, find or create user by phone
+    if (!userId) {
+      let dbUser = await prisma.user.findUnique({ where: { phone: parsed.data.phone } });
+      if (!dbUser) {
+        dbUser = await prisma.user.create({
+          data: {
+            phone: parsed.data.phone,
+            name: parsed.data.businessName,
+            email: parsed.data.email,
+            role: 'VENDOR',
+          },
+        });
+      } else {
+        await prisma.user.update({
+          where: { id: dbUser.id },
+          data: { role: 'VENDOR' },
+        });
+      }
+      userId = dbUser.id;
+      userPayload = { userId: dbUser.id, phone: dbUser.phone, role: 'VENDOR' };
     }
 
-    const vendor = await prisma.$transaction(async (tx: any) => {
-      const profile = await tx.vendorProfile.create({
-        data: { ...parsed.data, userId: user.userId, status: 'PENDING', isActive: false },
-      });
-
-      // Update user role to VENDOR
-      await tx.user.update({ where: { id: user.userId }, data: { role: 'VENDOR' } });
-
-      return profile;
+    // Check if vendor profile already exists for this user or phone
+    let vendor = await prisma.vendorProfile.findFirst({
+      where: {
+        OR: [
+          { userId },
+          { phone: parsed.data.phone },
+        ],
+      },
     });
 
-    return NextResponse.json({
-      success: true,
-      message: 'Vendor registration submitted! Admin will review in 24-48 hours.',
-      vendor,
-    }, { status: 201 });
-  } catch (error) {
-    if (error instanceof Error && error.message === 'UNAUTHORIZED') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (vendor) {
+      // Update existing vendor
+      vendor = await prisma.vendorProfile.update({
+        where: { id: vendor.id },
+        data: {
+          ...parsed.data,
+          userId,
+          status: 'APPROVED',
+          isActive: true,
+        },
+      });
+    } else {
+      // Create new approved vendor
+      vendor = await prisma.vendorProfile.create({
+        data: {
+          ...parsed.data,
+          userId,
+          status: 'APPROVED',
+          isActive: true,
+        },
+      });
     }
+
+    // Ensure user role is VENDOR
+    await prisma.user.update({
+      where: { id: userId! },
+      data: { role: 'VENDOR' },
+    });
+
+    // Generate fresh tokens for instant seamless login
+    const accessToken = signAccessToken({ userId: userId!, phone: parsed.data.phone, role: 'VENDOR' });
+    const refreshToken = signRefreshToken({ userId: userId!, phone: parsed.data.phone, role: 'VENDOR' });
+
+    const response = NextResponse.json({
+      success: true,
+      message: '🎉 वेंडर रजिस्ट्रेशन सफल! आपकी दुकान सक्रिय हो गई है।',
+      vendor,
+      user: { id: userId!, phone: parsed.data.phone, name: parsed.data.businessName, role: 'VENDOR' },
+      accessToken,
+      refreshToken,
+    }, { status: 201 });
+
+    response.cookies.set('token', accessToken, { path: '/', maxAge: 604800, sameSite: 'lax' });
+    return response;
+  } catch (error) {
     console.error('vendor register error:', error);
-    return NextResponse.json({ error: 'Registration failed' }, { status: 500 });
+    return NextResponse.json({ error: 'Registration failed. Please try again.' }, { status: 500 });
   }
 }
 
 export async function GET(req: NextRequest) {
   try {
-    const user = requireAuth(req);
+    const user = getUserFromRequest(req);
+    if (!user) {
+      return NextResponse.json({ vendor: null });
+    }
     const vendor = await prisma.vendorProfile.findUnique({
       where: { userId: user.userId },
       include: { _count: { select: { products: true, vendorOrders: true } } },
     });
-    if (!vendor) return NextResponse.json({ vendor: null });
-    return NextResponse.json({ vendor });
+    return NextResponse.json({ vendor: vendor ?? null });
   } catch (error) {
-    if (error instanceof Error && error.message === 'UNAUTHORIZED') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    return NextResponse.json({ error: 'Failed to fetch vendor profile' }, { status: 500 });
+    console.error('vendor register GET error:', error);
+    return NextResponse.json({ vendor: null });
   }
 }

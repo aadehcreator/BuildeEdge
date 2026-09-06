@@ -1,8 +1,8 @@
 import { prisma } from '@/lib/prisma';
 import HeroBanner from '@/components/home/HeroBanner';
 import CategoryGrid from '@/components/home/CategoryGrid';
-import FeaturedProducts from '@/components/home/FeaturedProducts';
-import NewLaunches from '@/components/home/NewLaunches';
+import MaterialGuide from '@/components/home/MaterialGuide';
+import CoreMaterialsSection from '@/components/home/CoreMaterialsSection';
 import AppDownloadBanner from '@/components/home/AppDownloadBanner';
 import { Truck, Clock, Shield, Headphones } from 'lucide-react';
 
@@ -15,41 +15,81 @@ const TRUST_BADGES = [
   { icon: Headphones, label: 'WhatsApp Support', sub: '+91 8109585179' },
 ];
 
+const CORE_CATEGORY_SLUGS = ['cement', 'steel-tmt', 'bricks-blocks', 'sand-aggregates'];
+
 async function getHomeData() {
-  const [banners, categories, rawFeatured, rawNew] = await Promise.all([
+  const [banners, allCategories, allProducts] = await Promise.all([
     prisma.banner.findMany({ where: { isActive: true }, orderBy: { sortOrder: 'asc' } }),
     prisma.category.findMany({
       where: { isActive: true, parentId: null },
       include: { children: { where: { isActive: true } } },
       orderBy: { sortOrder: 'asc' },
-      take: 12,
     }),
     prisma.product.findMany({
-      where: { isActive: true, isFeatured: true },
-      include: { brand: { select: { name: true } } },
+      where: { isActive: true },
+      include: {
+        brand: { select: { name: true } },
+        category: { select: { name: true, slug: true } },
+      },
       orderBy: { createdAt: 'desc' },
-      take: 8,
-    }),
-    prisma.product.findMany({
-      where: { isActive: true, isNewLaunch: true },
-      include: { brand: { select: { name: true } } },
-      orderBy: { createdAt: 'desc' },
-      take: 10,
     }),
   ]);
-  const featuredProducts = rawFeatured.map((p: any) => ({
-    ...p,
-    bulkPrices: p.bulkPrices as Array<{ minQty: number; price: number }> | null,
-  }));
-  const newProducts = rawNew.map((p: any) => ({
-    ...p,
-    bulkPrices: p.bulkPrices as Array<{ minQty: number; price: number }> | null,
-  }));
-  return { banners, categories, featuredProducts, newProducts };
+
+  // Only keep core construction categories on the home screen
+  const categories = allCategories.filter((c: any) =>
+    CORE_CATEGORY_SLUGS.includes(c.slug)
+  );
+
+  // Filter ONLY core construction material products (Cement, Steel, Bricks, Sand, Gitti, AAC)
+  const coreProducts = allProducts
+    .filter((p: any) => {
+      const catSlug = (p.category?.slug || '').toLowerCase();
+      const name = (p.name || '').toLowerCase();
+      const desc = (p.description || '').toLowerCase();
+
+      // Exclude clearly non-core products
+      if (
+        catSlug.includes('plywood') ||
+        catSlug.includes('paint') ||
+        catSlug.includes('electrical') ||
+        catSlug.includes('plumbing') ||
+        catSlug.includes('sanitaryware') ||
+        name.includes('plywood') ||
+        name.includes('paint') ||
+        name.includes('switch') ||
+        name.includes('pipe') ||
+        name.includes('toilet')
+      ) {
+        return false;
+      }
+
+      return (
+        CORE_CATEGORY_SLUGS.includes(catSlug) ||
+        name.includes('cement') ||
+        name.includes('tmt') ||
+        name.includes('sariya') ||
+        name.includes('steel') ||
+        name.includes('brick') ||
+        name.includes('ईंट') ||
+        name.includes('aac') ||
+        name.includes('sand') ||
+        name.includes('ret') ||
+        name.includes('aggregate') ||
+        name.includes('gitti') ||
+        desc.includes('cement') ||
+        desc.includes('foundation')
+      );
+    })
+    .map((p: any) => ({
+      ...p,
+      bulkPrices: p.bulkPrices as Array<{ minQty: number; price: number }> | null,
+    }));
+
+  return { banners, categories, coreProducts };
 }
 
 export default async function HomePage() {
-  const { banners, categories, featuredProducts, newProducts } = await getHomeData();
+  const { banners, categories, coreProducts } = await getHomeData();
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 space-y-8">
@@ -71,23 +111,23 @@ export default async function HomePage() {
         ))}
       </div>
 
-      {/* Categories */}
+      {/* Core Construction Material & Purpose Guide */}
+      <MaterialGuide />
+
+      {/* Core Categories Only */}
       {categories.length > 0 && <CategoryGrid categories={categories} />}
 
-      {/* Featured products */}
-      {featuredProducts.length > 0 && <FeaturedProducts products={featuredProducts} />}
-
-      {/* New launches */}
-      {newProducts.length > 0 && <NewLaunches products={newProducts} />}
+      {/* Core Construction Materials (Interactive Details, Add to Cart & Direct Order) */}
+      <CoreMaterialsSection products={coreProducts} />
 
       {/* App download */}
       <AppDownloadBanner />
 
       {/* About blurb */}
       <section className="bg-white rounded-2xl border border-gray-100 p-6 text-center">
-        <h2 className="font-heading font-bold text-xl mb-2">HomeRun · Construction &amp; Building Materials Delivered in 60 Mins</h2>
+        <h2 className="font-heading font-bold text-xl mb-2">HomeRun · मुख्य निर्माण सामग्री साइट डिलीवरी</h2>
         <p className="text-sm text-muted max-w-2xl mx-auto">
-          HomeRun brings the hardware store and bulk building materials right to your site. Cement, steel, tiling supplies, paint, waterproofing, plywood, and electricals from 100% genuine brands with transparent wholesale pricing.
+          सीमेंट (UltraTech, ACC), सरिया (Tata Tiscon, JSW), अव्वल लाल ईंट, चंबल नदी की रेत, कंक्रीट गिट्टी एवं AAC ब्लॉक्स सीधे आपकी निर्माण साइट पर थोक रेट में उपलब्ध।
         </p>
       </section>
     </div>

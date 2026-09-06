@@ -1,28 +1,51 @@
 // Redis optional — app works without it in dev mode
 let redis: { get: (k: string) => Promise<string | null>; set: (k: string, v: string, ...args: unknown[]) => Promise<void>; del: (k: string) => Promise<void>; incr: (k: string) => Promise<number>; expire: (k: string, s: number) => Promise<void> } | null = null;
 
-// In-memory fallback (for dev without Redis)
-const memStore = new Map<string, { value: string; expiry?: number }>();
+// Global in-memory fallback (persists across Next.js compilation, route workers & HMR)
+const globalForOTP = globalThis as unknown as {
+  __buildEdge_memStore?: Map<string, { value: string; expiry?: number }>;
+};
+
+if (!globalForOTP.__buildEdge_memStore) {
+  globalForOTP.__buildEdge_memStore = new Map();
+}
+const memStore = globalForOTP.__buildEdge_memStore;
+
+function cleanKey(k: string): string {
+  if (k.startsWith('otp:')) {
+    const raw = k.slice(4);
+    const digits = raw.replace(/\D/g, '').slice(-10);
+    return `otp:${digits}`;
+  }
+  return k;
+}
 
 const mem = {
   get: async (k: string) => {
-    const item = memStore.get(k);
+    const key = cleanKey(k);
+    const item = memStore.get(key);
     if (!item) return null;
-    if (item.expiry && Date.now() > item.expiry) { memStore.delete(k); return null; }
+    if (item.expiry && Date.now() > item.expiry) { memStore.delete(key); return null; }
     return item.value;
   },
   set: async (k: string, v: string, ex?: string, ttl?: number) => {
-    memStore.set(k, { value: v, expiry: ttl ? Date.now() + ttl * 1000 : undefined });
+    const key = cleanKey(k);
+    memStore.set(key, { value: v, expiry: ttl ? Date.now() + ttl * 1000 : undefined });
   },
-  del: async (k: string) => { memStore.delete(k); },
+  del: async (k: string) => { 
+    const key = cleanKey(k);
+    memStore.delete(key); 
+  },
   incr: async (k: string) => {
-    const cur = parseInt((await mem.get(k)) ?? '0') + 1;
-    await mem.set(k, String(cur));
+    const key = cleanKey(k);
+    const cur = parseInt((await mem.get(key)) ?? '0') + 1;
+    await mem.set(key, String(cur));
     return cur;
   },
   expire: async (k: string, s: number) => {
-    const item = memStore.get(k);
-    if (item) memStore.set(k, { ...item, expiry: Date.now() + s * 1000 });
+    const key = cleanKey(k);
+    const item = memStore.get(key);
+    if (item) memStore.set(key, { ...item, expiry: Date.now() + s * 1000 });
   },
 };
 
@@ -42,24 +65,40 @@ try {
 const store = redis ?? mem;
 
 export async function setOTP(phone: string, otp: string): Promise<void> {
-  try {
-    await store.set(`otp:${phone}`, otp, 'EX', 300);
-  } catch {
-    await mem.set(`otp:${phone}`, otp, 'EX', 300);
+  const normKey = cleanKey(`otp:${phone}`);
+  // Always write to in-memory store immediately to guarantee availability across Next.js API routes
+  await mem.set(normKey, otp, 'EX', 600); // 10 minutes expiry
+  if (redis) {
+    try {
+      await redis.set(normKey, otp, 'EX', 600);
+    } catch {
+      // Fallback already saved in mem
+    }
   }
 }
+
 export async function getOTP(phone: string): Promise<string | null> {
-  try {
-    return await store.get(`otp:${phone}`);
-  } catch {
-    return await mem.get(`otp:${phone}`);
+  const normKey = cleanKey(`otp:${phone}`);
+  // Check in-memory first for zero-latency across route calls
+  const memValue = await mem.get(normKey);
+  if (memValue) return memValue;
+  if (redis) {
+    try {
+      return await redis.get(normKey);
+    } catch {
+      return null;
+    }
   }
+  return null;
 }
+
 export async function deleteOTP(phone: string): Promise<void> {
-  try {
-    await store.del(`otp:${phone}`);
-  } catch {
-    await mem.del(`otp:${phone}`);
+  const normKey = cleanKey(`otp:${phone}`);
+  await mem.del(normKey);
+  if (redis) {
+    try {
+      await redis.del(normKey);
+    } catch {}
   }
 }
 export async function setRefreshToken(userId: string, token: string): Promise<void> {

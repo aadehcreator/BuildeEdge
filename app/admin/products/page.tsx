@@ -2,6 +2,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import Image from 'next/image';
+import { DEFAULT_PRODUCT_IMAGE } from '@/lib/constants';
 import { Search, Plus, Loader2, Pencil, Trash2, ToggleLeft, ToggleRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
@@ -24,6 +25,59 @@ export default function AdminProductsPage() {
   const [searchInput, setSearchInput] = useState('');
   const [page, setPage] = useState(1);
   const [updating, setUpdating] = useState<string | null>(null);
+
+  // Edit modal state
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editSellingPrice, setEditSellingPrice] = useState('');
+  const [editMrp, setEditMrp] = useState('');
+  const [editStock, setEditStock] = useState('');
+  const [editImage, setEditImage] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const openEditModal = (product: Product) => {
+    setEditingProduct(product);
+    setEditName(product.name);
+    setEditSellingPrice(String(product.sellingPrice));
+    setEditMrp(String(product.mrp));
+    setEditStock(String(product.stock));
+    setEditImage(product.images[0] || '');
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingProduct) return;
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/admin/products/${editingProduct.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+        body: JSON.stringify({
+          name: editName,
+          sellingPrice: parseFloat(editSellingPrice) || 0,
+          mrp: parseFloat(editMrp) || 0,
+          stock: parseInt(editStock, 10) || 0,
+          images: editImage ? [editImage] : editingProduct.images,
+        }),
+      });
+      if (!res.ok) throw new Error('Failed to update product');
+
+      setProducts((prev) => prev.map((p) => p.id === editingProduct.id ? {
+        ...p,
+        name: editName,
+        sellingPrice: parseFloat(editSellingPrice) || p.sellingPrice,
+        mrp: parseFloat(editMrp) || p.mrp,
+        stock: parseInt(editStock, 10) || p.stock,
+        images: editImage ? [editImage] : p.images,
+      } : p));
+
+      toast.success('Product updated successfully');
+      setEditingProduct(null);
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to update');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
@@ -153,7 +207,7 @@ export default function AdminProductsPage() {
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-gray-700 overflow-hidden flex-shrink-0">
                             <Image
-                              src={product.images[0] ?? 'https://placehold.co/40x40?text=?'}
+                              src={product.images[0] ?? DEFAULT_PRODUCT_IMAGE}
                               alt={product.name}
                               width={40} height={40}
                               className="w-full h-full object-contain p-1"
@@ -193,7 +247,10 @@ export default function AdminProductsPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1.5">
-                          <button className="p-1.5 rounded-lg bg-gray-700 text-gray-300 hover:bg-gray-600 transition-colors">
+                          <button
+                            onClick={() => openEditModal(product)}
+                            className="p-1.5 rounded-lg bg-gray-700 text-gray-300 hover:bg-gray-600 transition-colors"
+                          >
                             <Pencil size={12} />
                           </button>
                           <button
@@ -220,6 +277,90 @@ export default function AdminProductsPage() {
             </div>
           )}
         </>
+      )}
+
+      {/* Edit Product Modal */}
+      {editingProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-lg p-6 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-800">
+              <h2 className="text-lg font-bold text-white">Edit Product</h2>
+              <button onClick={() => setEditingProduct(null)} className="text-gray-400 hover:text-white text-sm font-semibold">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">Product Name</label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1">Selling Price (₹)</label>
+                  <input
+                    type="number"
+                    value={editSellingPrice}
+                    onChange={(e) => setEditSellingPrice(e.target.value)}
+                    className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1">MRP (₹)</label>
+                  <input
+                    type="number"
+                    value={editMrp}
+                    onChange={(e) => setEditMrp(e.target.value)}
+                    className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1">Stock Quantity</label>
+                  <input
+                    type="number"
+                    value={editStock}
+                    onChange={(e) => setEditStock(e.target.value)}
+                    className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1">Image URL</label>
+                  <input
+                    type="text"
+                    value={editImage}
+                    onChange={(e) => setEditImage(e.target.value)}
+                    placeholder="https://..."
+                    className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-3 border-t border-gray-800">
+              <button
+                onClick={() => setEditingProduct(null)}
+                className="px-4 py-2 bg-gray-800 text-gray-300 rounded-xl text-sm hover:bg-gray-700 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveEdit}
+                disabled={saving}
+                className="flex items-center gap-2 px-5 py-2 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-dark transition-colors disabled:opacity-50"
+              >
+                {saving && <Loader2 size={14} className="animate-spin" />}
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

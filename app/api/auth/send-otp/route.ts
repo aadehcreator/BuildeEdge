@@ -14,28 +14,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: parsed.error.errors[0].message }, { status: 400 });
     }
 
-    const { phone } = parsed.data;
+    const cleanPhone = parsed.data.phone.replace(/\D/g, '').slice(-10);
 
-    // Rate limit: 5 OTPs per 15 minutes per phone
-    const allowed = await checkRateLimit(`otp:${phone}`, 5, 900).catch(() => true);
+    // Rate limit: generous for development / testing, strict for production SMS
+    const hasSmsGateway = Boolean(process.env.TWILIO_ACCOUNT_SID || process.env.FAST2SMS_API_KEY);
+    const otpLimit = hasSmsGateway ? 10 : 100;
+    const allowed = await checkRateLimit(`otp:${cleanPhone}`, otpLimit, 900).catch(() => true);
     if (!allowed) {
-      return NextResponse.json({ error: 'Too many OTP requests. Please wait 15 minutes.' }, { status: 429 });
+      return NextResponse.json({ error: 'Too many OTP requests. Please wait a few minutes.' }, { status: 429 });
     }
 
     const otp = generateOTP();
-    await setOTP(phone, otp);
+    await setOTP(cleanPhone, otp);
 
-    // In production: send via Firebase/Twilio
-    // For dev: log to console
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`📱 OTP for ${phone}: ${otp}`);
-    }
+    console.log(`📱 OTP for ${cleanPhone}: ${otp}`);
 
     return NextResponse.json({
       success: true,
-      message: `OTP sent to +91 ${phone}`,
-      // REMOVE in production:
-      ...(process.env.NODE_ENV === 'development' && { devOtp: otp }),
+      message: `OTP sent to +91 ${cleanPhone}`,
+      ...(!hasSmsGateway && { devOtp: otp }),
     });
   } catch (error) {
     console.error('send-otp error:', error);

@@ -8,6 +8,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { CheckCircle, Circle, Loader2, MapPin, Phone } from 'lucide-react';
 import LiveTrackingMap from '@/components/home/LiveTrackingMap';
+import { DEFAULT_PRODUCT_IMAGE } from '@/lib/constants';
 
 interface OrderItem { productName: string; productImage: string; quantity: number; price: number; unit: string; mrp: number; }
 interface OrderDetail {
@@ -103,7 +104,7 @@ export default function OrderDetailPage() {
           {order.items.map((item, i) => (
             <li key={i} className="flex items-center gap-3">
               <div className="w-14 h-14 rounded-lg bg-gray-50 border border-gray-100 overflow-hidden flex-shrink-0">
-                <Image src={item.productImage || 'https://placehold.co/56x56?text=?'} alt={item.productName} width={56} height={56} className="w-full h-full object-contain p-1" />
+                <Image src={item.productImage || DEFAULT_PRODUCT_IMAGE} alt={item.productName} width={56} height={56} className="w-full h-full object-contain p-1" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-secondary line-clamp-2">{item.productName}</p>

@@ -1,7 +1,7 @@
 'use client';
 export const dynamic = 'force-dynamic';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -11,32 +11,98 @@ import Cookies from 'js-cookie';
 import OTPInput from '@/components/auth/OTPInput';
 import { useAuthStore } from '@/store/authStore';
 import { useCartStore } from '@/store/cartStore';
+import { loadFirebaseScripts } from '@/lib/firebaseClient';
 
 type Step = 'phone' | 'otp';
 
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get('redirect') ?? '/';
-  const { setAuth } = useAuthStore();
+  const rawRedirect = searchParams.get('redirect') ?? '/';
+  const redirect = rawRedirect.startsWith('/login') ? '/' : rawRedirect;
+  const { user, accessToken, setAuth } = useAuthStore();
   const { mergeWithServerCart } = useCartStore();
+
+  useEffect(() => {
+    let hasToken = !!accessToken;
+    try {
+      const persistedState = localStorage.getItem('buildedge-auth');
+      if (persistedState) {
+        const parsed = JSON.parse(persistedState);
+        if (parsed?.state?.accessToken) hasToken = true;
+      }
+    } catch {}
+
+    if (hasToken) {
+      router.replace(redirect);
+    }
+  }, [accessToken, redirect, router]);
 
   const [step, setStep] = useState<Step>('phone');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
-  const [devOtp, setDevOtp] = useState('');
   const [resendIn, setResendIn] = useState(0);
+  const confirmationResultRef = useRef<any>(null);
+  const recaptchaVerifierRef = useRef<any>(null);
+
+  useEffect(() => {
+    // Preload Firebase scripts in background
+    loadFirebaseScripts().catch(() => {});
+    return () => {
+      if (recaptchaVerifierRef.current) {
+        try {
+          recaptchaVerifierRef.current.clear();
+        } catch {}
+      }
+    };
+  }, []);
 
   const startResendTimer = () => {
     setResendIn(30);
     const id = setInterval(() => setResendIn((v) => { if (v <= 1) { clearInterval(id); return 0; } return v - 1; }), 1000);
   };
 
+  const setupRecaptcha = async (fb: any) => {
+    if (!recaptchaVerifierRef.current) {
+      try {
+        const auth = fb.auth();
+        recaptchaVerifierRef.current = new fb.auth.RecaptchaVerifier('recaptcha-container', {
+          size: 'invisible',
+          callback: () => {},
+        });
+      } catch (e) {
+        console.error('Recaptcha setup error:', e);
+      }
+    }
+    return recaptchaVerifierRef.current;
+  };
+
   const sendOTP = async () => {
     if (!/^[6-9]\d{9}$/.test(phone)) { toast.error('Enter a valid 10-digit mobile number'); return; }
     setLoading(true);
     try {
+      const formattedPhone = `+91${phone}`;
+      
+      try {
+        const fb = await loadFirebaseScripts();
+        const auth = fb.auth();
+        const recaptchaVerifier = await setupRecaptcha(fb);
+
+        if (recaptchaVerifier) {
+          const confirmation = await auth.signInWithPhoneNumber(formattedPhone, recaptchaVerifier);
+          confirmationResultRef.current = confirmation;
+          toast.success(`Firebase OTP sent to ${formattedPhone}`);
+          setStep('otp');
+          startResendTimer();
+          setLoading(false);
+          return;
+        }
+      } catch (firebaseErr: any) {
+        console.warn('Firebase phone auth fallback to backend OTP:', firebaseErr);
+      }
+
+      // Fallback to backend API send-otp if Firebase is not configured or fails
       const res = await fetch('/api/auth/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -44,12 +110,14 @@ function LoginContent() {
       });
       const data = await res.json() as { success?: boolean; message?: string; devOtp?: string; error?: string };
       if (!res.ok) throw new Error(data.error ?? 'Failed to send OTP');
-      toast.success(`OTP sent to +91 ${phone}`);
-      if (data.devOtp) { setDevOtp(data.devOtp); toast(`🔧 Dev OTP: ${data.devOtp}`, { duration: 10000 }); }
+      toast.success(`OTP sent to +91 ${phone} (Test Mode)`);
+      if (data.devOtp) {
+        setOtp(data.devOtp);
+      }
       setStep('otp');
       startResendTimer();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Failed to send OTP');
+    } catch (e: any) {
+      toast.error(e?.message || 'Failed to send OTP');
     } finally {
       setLoading(false);
     }
@@ -59,14 +127,29 @@ function LoginContent() {
     if (otp.length !== 6) { toast.error('Enter the 6-digit OTP'); return; }
     setLoading(true);
     try {
+      let verifiedPhone = phone;
+      if (confirmationResultRef.current) {
+        try {
+          const result = await confirmationResultRef.current.confirm(otp);
+          const userObj = result.user;
+          if (userObj && userObj.phoneNumber) {
+            verifiedPhone = userObj.phoneNumber.replace(/\D/g, '').slice(-10);
+          }
+        } catch (firebaseVerifyErr) {
+          console.warn('Firebase confirmation error, trying backend verify:', firebaseVerifyErr);
+        }
+      }
+
       const res = await fetch('/api/auth/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone, otp }),
+        body: JSON.stringify({ phone: verifiedPhone, otp }),
       });
       const data = await res.json() as { success?: boolean; user?: Parameters<typeof setAuth>[0]; accessToken?: string; refreshToken?: string; error?: string };
       if (!res.ok) throw new Error(data.error ?? 'Invalid OTP');
-      document.cookie = `token=${data.accessToken}; path=/; max-age=86400`;
+
+      document.cookie = `token=${data.accessToken}; path=/; max-age=604800; SameSite=None; Secure`;
+      document.cookie = `token=${data.accessToken}; path=/; max-age=604800; SameSite=Lax`;
       setAuth(data.user!, data.accessToken!, data.refreshToken!);
 
       // Merge local cart with server cart
@@ -88,6 +171,9 @@ function LoginContent() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-surface px-4">
       <div className="w-full max-w-md">
+        {/* Hidden recaptcha container for Firebase phone auth */}
+        <div id="recaptcha-container"></div>
+
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 font-heading font-bold text-2xl text-secondary">
@@ -110,7 +196,7 @@ function LoginContent() {
                 </div>
                 <h1 className="font-heading font-bold text-xl">Login / Sign Up</h1>
               </div>
-              <p className="text-sm text-muted mb-6">Enter your mobile number to continue</p>
+              <p className="text-sm text-muted mb-6">Enter your mobile number to continue with Firebase OTP</p>
 
               <div className="flex gap-2 mb-4">
                 <div className="flex items-center px-3 py-3 bg-surface border border-gray-200 rounded-xl text-sm font-medium text-secondary">
@@ -154,10 +240,6 @@ function LoginContent() {
               </p>
 
               <OTPInput value={otp} onChange={setOtp} disabled={loading} />
-
-              {devOtp && (
-                <p className="text-xs text-center text-muted mt-2">🔧 Dev: <span className="font-mono font-bold text-primary">{devOtp}</span></p>
-              )}
 
               <button
                 onClick={verifyOTP}

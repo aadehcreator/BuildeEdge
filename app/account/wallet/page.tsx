@@ -18,9 +18,19 @@ function WalletContent() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!accessToken) return;
+    let token = accessToken;
+    if (!token && typeof window !== 'undefined') {
+      try {
+        const persistedState = localStorage.getItem('buildedge-auth');
+        if (persistedState) {
+          const parsed = JSON.parse(persistedState);
+          token = parsed?.state?.accessToken;
+        }
+      } catch {}
+    }
+    if (!token) return;
     
-    fetch('/api/account/wallet', { headers: { Authorization: `Bearer ${accessToken}` } })
+    fetch('/api/account/wallet', { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json() as Promise<{ wallet: WalletData }>)
       .then(({ wallet }) => setWallet(wallet))
       .catch(() => {})

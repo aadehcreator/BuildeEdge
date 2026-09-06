@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
 import { Package, ChevronRight, Loader2 } from 'lucide-react';
 import Image from 'next/image';
+import { DEFAULT_PRODUCT_IMAGE } from '@/lib/constants';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 interface Order {
@@ -29,9 +30,19 @@ function OrdersContent() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!accessToken) return;
+    let token = accessToken;
+    if (!token && typeof window !== 'undefined') {
+      try {
+        const persistedState = localStorage.getItem('buildedge-auth');
+        if (persistedState) {
+          const parsed = JSON.parse(persistedState);
+          token = parsed?.state?.accessToken;
+        }
+      } catch {}
+    }
+    if (!token) return;
     
-    fetch('/api/orders', { headers: { Authorization: `Bearer ${accessToken}` } })
+    fetch('/api/orders', { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json() as Promise<{ orders: Order[] }>)
       .then(({ orders }) => setOrders(orders ?? []))
       .catch(() => {})
@@ -71,7 +82,7 @@ function OrdersContent() {
                 <div className="flex items-center gap-2 mb-3">
                   {order.items.slice(0, 3).map((item, i) => (
                     <div key={i} className="w-12 h-12 rounded-lg bg-gray-50 border border-gray-100 overflow-hidden flex-shrink-0">
-                      <Image src={item.productImage || 'https://placehold.co/48x48?text=?'} alt={item.productName} width={48} height={48} className="w-full h-full object-contain p-1" />
+                      <Image src={item.productImage || DEFAULT_PRODUCT_IMAGE} alt={item.productName} width={48} height={48} className="w-full h-full object-contain p-1" />
                     </div>
                   ))}
                   {order.items.length > 3 && (

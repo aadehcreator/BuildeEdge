@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { CartItem } from '@/store/cartStore';
 import { useCart } from '@/hooks/useCart';
 import { getEffectivePrice } from '@/store/cartStore';
+import { DEFAULT_PRODUCT_IMAGE } from '@/lib/constants';
 
 interface CartItemRowProps { item: CartItem; }
 
@@ -28,7 +29,7 @@ export default function CartItemRow({ item }: CartItemRowProps) {
       <Link href={`/products/${product.slug}`} className="flex-shrink-0">
         <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-50 border border-gray-100">
           <Image
-            src={product.images[0] ?? 'https://placehold.co/64x64?text=?'}
+            src={product.images[0] ?? DEFAULT_PRODUCT_IMAGE}
             alt={product.name}
             width={64}
             height={64}

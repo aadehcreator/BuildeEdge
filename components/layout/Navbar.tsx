@@ -54,49 +54,37 @@ export default function Navbar() {
       </div>
 
       <header className="sticky top-0 z-50 bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
-          <div className="flex items-center gap-3 lg:gap-6">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 sm:py-3">
+          <div className="flex items-center justify-between gap-2 sm:gap-4">
+            {/* Logo & Location */}
+            <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+              <Link href="/" className="flex-shrink-0 flex items-center gap-2 font-heading font-bold text-xl text-secondary">
+                <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm">HR</div>
+                <span className="tracking-tight">Home<span className="text-amber-600">Run</span></span>
+              </Link>
 
-// ... existing code ...
-            {/* Logo */}
-            <Link href="/" className="flex-shrink-0 flex items-center gap-2 font-heading font-bold text-xl text-secondary">
-              <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm">HR</div>
-              <span className="tracking-tight">Home<span className="text-amber-600">Run</span></span>
-            </Link>
-            
-            {/* New Categories */}
-            <div className="hidden xl:flex items-center gap-4 text-sm font-medium text-gray-700">
-              {['Cement', 'Steel Rebars', 'Bricks', 'Sand'].map((cat) => (
-                <Link key={cat} href={`/collections/${cat.toLowerCase()}`} className="hover:text-primary transition-colors">{cat}</Link>
-              ))}
-              {['Power Tools', 'Tiles', 'Paints', 'Plumbing'].map((cat) => (
-                <span key={cat} className="text-gray-400 cursor-not-allowed flex items-center gap-1.5">
-                  {cat}
-                  <span className="text-[9px] bg-gray-100 text-gray-500 px-1 py-0.5 rounded uppercase">Soon</span>
+              {/* Location & Speed */}
+              <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-gray-200">
+                <span className="bg-primary/10 text-primary text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                  ⚡ 60 Mins
                 </span>
-              ))}
+                <button onClick={openPincodeModal} className="flex items-center gap-1 text-xs text-muted hover:text-primary transition-colors font-medium">
+                  <MapPin size={13} className="text-primary flex-shrink-0" />
+                  <span className="max-w-[85px] truncate">{pincode ?? 'Set pincode'}</span>
+                  <ChevronDown size={11} className="flex-shrink-0" />
+                </button>
+              </div>
             </div>
 
-            {/* Location */}
-            <div className="hidden lg:flex items-center gap-2">
-// ... existing code ...
-              <span className="bg-primary text-white text-xs font-semibold px-2.5 py-1 rounded-full">⚡ 60 Mins</span>
-              <button onClick={openPincodeModal} className="flex items-center gap-1 text-sm text-muted hover:text-primary transition-colors">
-                <MapPin size={14} className="text-primary" />
-                <span className="font-medium">{pincode ?? 'Set pincode'}</span>
-                <ChevronDown size={12} />
-              </button>
-            </div>
-
-            {/* Search */}
-            <div className="flex-1 min-w-0">
+            {/* Desktop Search */}
+            <div className="hidden md:flex flex-1 max-w-xl mx-2 lg:mx-6 min-w-[200px]">
               <SearchBar />
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
               <a href="https://wa.me/918109585179" target="_blank" rel="noopener noreferrer"
-                className="hidden md:flex items-center gap-1.5 text-xs text-muted hover:text-primary transition-colors">
+                className="hidden lg:flex items-center gap-1.5 text-xs text-muted hover:text-primary transition-colors px-2 py-1.5 rounded-lg hover:bg-surface">
                 <Phone size={14} />
                 <span>Help</span>
               </a>
@@ -200,21 +188,79 @@ export default function Navbar() {
               </button>
             </div>
           </div>
+
+          {/* Mobile Search Bar (dedicated row, never overlaps login or cart) */}
+          <div className="md:hidden pt-2 pb-0.5">
+            <SearchBar />
+          </div>
         </div>
+
+        {/* Category Navigation Bar */}
+        <nav className="border-t border-gray-100 bg-white shadow-xs">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6">
+            <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto py-2 text-xs sm:text-sm font-medium text-gray-700 no-scrollbar whitespace-nowrap">
+               {[
+                { name: 'Cement', href: '/collections/cement' },
+                { name: 'Bricks', href: '/collections/bricks-blocks' },
+                { name: 'Sand', href: '/collections/sand-aggregates' },
+                { name: 'Aggregate', href: '/collections/sand-aggregates' },
+                { name: 'TMT Steel', href: '/collections/steel-tmt' },
+                { name: 'AAC Blocks', href: '/collections/bricks-blocks' },
+                { name: 'Plywood', href: '/collections/plywood-boards' },
+                { name: 'Paints', href: '/collections/paints-primers' },
+                { name: 'Plumbing', href: '/collections/plumbing-pipes' },
+                { name: 'Electricals', href: '/collections/electrical-wires' },
+              ].map((cat) => (
+                <Link
+                  key={cat.name}
+                  href={cat.href}
+                  className="inline-flex items-center gap-1.5 hover:text-primary transition-colors py-1 px-2 rounded-lg hover:bg-orange-50 font-semibold shrink-0"
+                >
+                  <span>{cat.name}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </nav>
 
         {/* Mobile menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-gray-100 bg-white px-4 py-3 space-y-2">
-            <button onClick={openPincodeModal} className="flex items-center gap-2 text-sm py-2 w-full">
+          <div className="lg:hidden border-t border-gray-100 bg-white px-4 py-3 space-y-2.5">
+            <button onClick={openPincodeModal} className="flex items-center gap-2 text-sm py-1.5 w-full">
               <MapPin size={14} className="text-primary" />
               <span>Deliver to: <strong>{pincode ?? 'Set pincode'}</strong></span>
             </button>
-            <a href="https://wa.me/918109585179" className="flex items-center gap-2 text-sm py-2 text-green-600">
-              <Phone size={14} /> WhatsApp Support
-            </a>
-            <Link href="/become-vendor" className="flex items-center gap-2 text-sm py-2 text-orange-600">
-              <Store size={14} /> Become a Vendor
-            </Link>
+            <div className="pt-2 border-t border-gray-100">
+              <p className="text-[11px] font-bold uppercase text-muted mb-2">Core Materials:</p>
+              <div className="grid grid-cols-2 gap-1.5 text-xs">
+                <Link href="/collections/cement" onClick={() => setMobileMenuOpen(false)} className="p-2 rounded-lg bg-gray-50 hover:bg-orange-50 hover:text-primary font-semibold">
+                  <span>Cement</span>
+                </Link>
+                <Link href="/collections/bricks-blocks" onClick={() => setMobileMenuOpen(false)} className="p-2 rounded-lg bg-gray-50 hover:bg-orange-50 hover:text-primary font-semibold">
+                  <span>Bricks</span>
+                </Link>
+                <Link href="/collections/sand-aggregates" onClick={() => setMobileMenuOpen(false)} className="p-2 rounded-lg bg-gray-50 hover:bg-orange-50 hover:text-primary font-semibold">
+                  <span>Sand</span>
+                </Link>
+                <Link href="/collections/sand-aggregates" onClick={() => setMobileMenuOpen(false)} className="p-2 rounded-lg bg-gray-50 hover:bg-orange-50 hover:text-primary font-semibold">
+                  <span>Aggregate</span>
+                </Link>
+                <Link href="/collections/steel-tmt" onClick={() => setMobileMenuOpen(false)} className="p-2 rounded-lg bg-gray-50 hover:bg-orange-50 hover:text-primary font-semibold">
+                  <span>TMT Steel</span>
+                </Link>
+                <Link href="/collections/bricks-blocks" onClick={() => setMobileMenuOpen(false)} className="p-2 rounded-lg bg-gray-50 hover:bg-orange-50 hover:text-primary font-semibold">
+                  <span>AAC Blocks</span>
+                </Link>
+              </div>
+            </div>
+            <div className="pt-2 border-t border-gray-100 space-y-1">
+              <a href="https://wa.me/918109585179" className="flex items-center gap-2 text-sm py-1.5 text-green-600 font-medium">
+                <Phone size={14} /> WhatsApp Support
+              </a>
+              <Link href="/become-vendor" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 text-sm py-1.5 text-orange-600 font-medium">
+                <Store size={14} /> Become a Vendor
+              </Link>
+            </div>
           </div>
         )}
       </header>

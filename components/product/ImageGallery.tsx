@@ -3,6 +3,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
+import { DEFAULT_PRODUCT_IMAGE } from '@/lib/constants';
 
 interface ImageGalleryProps {
   images: string[];
@@ -13,7 +14,7 @@ export default function ImageGallery({ images, productName }: ImageGalleryProps)
   const [activeIdx, setActiveIdx] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
-  const allImages = images.length > 0 ? images : ['https://placehold.co/600x600?text=No+Image'];
+  const allImages = images.length > 0 ? images : [DEFAULT_PRODUCT_IMAGE];
 
   const prev = () => setActiveIdx((i) => (i - 1 + allImages.length) % allImages.length);
   const next = () => setActiveIdx((i) => (i + 1) % allImages.length);

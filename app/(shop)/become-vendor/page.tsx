@@ -28,7 +28,6 @@ export default function BecomeVendorPage() {
   const router = useRouter();
 
   const handleStart = () => {
-    if (!user) { router.push('/login?redirect=/vendor/profile'); return; }
     router.push('/vendor/profile');
   };
 

@@ -25,13 +25,23 @@ export default function AddressesPage() {
   const [form, setForm] = useState({ label: 'Home', line1: '', line2: '', pincode: '', city: 'Gwalior' });
 
   const fetchAddresses = async () => {
-    if (!accessToken) {
+    let token = accessToken;
+    if (!token && typeof window !== 'undefined') {
+      try {
+        const persistedState = localStorage.getItem('buildedge-auth');
+        if (persistedState) {
+          const parsed = JSON.parse(persistedState);
+          token = parsed?.state?.accessToken;
+        }
+      } catch {}
+    }
+    if (!token) {
       router.push('/login?redirect=/account/addresses');
       return;
     }
     try {
       const res = await fetch('/api/account/addresses', {
-        headers: { Authorization: `Bearer ${accessToken}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (res.status === 401) {
         logout();

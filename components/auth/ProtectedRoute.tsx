@@ -17,21 +17,42 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   useEffect(() => {
     if (!isClient) return;
     
-    // Check localStorage directly for persistence
-    const persistedState = localStorage.getItem('buildedge-auth');
-    const isActuallyLoggedIn = !!accessToken || (persistedState && JSON.parse(persistedState).state.accessToken);
+    let hasLocalAuth = !!accessToken;
+    try {
+      const persistedState = localStorage.getItem('buildedge-auth');
+      if (persistedState) {
+        const parsed = JSON.parse(persistedState);
+        if (parsed?.state?.accessToken) {
+          hasLocalAuth = true;
+          // Ensure cookies are synced
+          document.cookie = `token=${parsed.state.accessToken}; path=/; max-age=604800; SameSite=None; Secure`;
+          document.cookie = `token=${parsed.state.accessToken}; path=/; max-age=604800; SameSite=Lax`;
+        }
+      }
+    } catch {}
 
-    if (!isLoading && !isActuallyLoggedIn) {
-      router.push(`/login?redirect=${window.location.pathname}`);
+    if (!isLoading && !hasLocalAuth) {
+      router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
     }
   }, [accessToken, isLoading, router, isClient]);
 
-  if (!isClient || isLoading || !accessToken) {
-    // If not client yet, or loading, or not logged in, show loader
+  // Check if token exists in state or localStorage
+  let hasLocalToken = !!accessToken;
+  if (!hasLocalToken && typeof window !== 'undefined') {
+    try {
+      const persistedState = localStorage.getItem('buildedge-auth');
+      if (persistedState) {
+        const parsed = JSON.parse(persistedState);
+        hasLocalToken = !!parsed?.state?.accessToken;
+      }
+    } catch {}
+  }
+
+  if (!isClient || isLoading || !hasLocalToken) {
     return (
-        <div className="min-h-screen flex items-center justify-center bg-surface">
-            <Loader2 size={32} className="animate-spin text-primary" />
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-surface">
+        <Loader2 size={32} className="animate-spin text-primary" />
+      </div>
     );
   }
 

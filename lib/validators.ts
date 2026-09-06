@@ -28,18 +28,18 @@ export const AddressSchema = z.object({
 
 // ── Cart ──────────────────────────────────────────────────────────────────────
 export const AddToCartSchema = z.object({
-  productId: z.string().cuid(),
+  productId: z.string().min(1, 'Product ID is required'),
   quantity: z.number().int().min(1).max(999),
 });
 
 export const UpdateCartSchema = z.object({
-  productId: z.string().cuid(),
+  productId: z.string().min(1, 'Product ID is required'),
   quantity: z.number().int().min(0).max(999),
 });
 
 // ── Order ─────────────────────────────────────────────────────────────────────
 export const CreateOrderSchema = z.object({
-  addressId: z.string().cuid(),
+  addressId: z.string().min(1, 'Address ID is required'),
   paymentMethod: z.enum(['ONLINE', 'COD']),
   useWallet: z.boolean().optional(),
   notes: z.string().max(500).optional(),
@@ -47,14 +47,14 @@ export const CreateOrderSchema = z.object({
 
 // ── Payment ───────────────────────────────────────────────────────────────────
 export const PaymentCreateSchema = z.object({
-  orderId: z.string().cuid(),
+  orderId: z.string().min(1, 'Order ID is required'),
 });
 
 export const PaymentVerifySchema = z.object({
   razorpay_order_id: z.string(),
   razorpay_payment_id: z.string(),
   razorpay_signature: z.string(),
-  orderId: z.string().cuid(),
+  orderId: z.string().min(1, 'Order ID is required'),
 });
 
 // ── Products (admin) ──────────────────────────────────────────────────────────
@@ -66,8 +66,8 @@ export const BulkPriceSchema = z.object({
 export const ProductSchema = z.object({
   name: z.string().min(3),
   description: z.string().optional(),
-  categoryId: z.string().cuid(),
-  brandId: z.string().cuid().optional(),
+  categoryId: z.string().min(1, 'Category ID is required'),
+  brandId: z.string().min(1).optional(),
   images: z.array(z.string().url()).min(1),
   mrp: z.number().positive(),
   sellingPrice: z.number().positive(),
@@ -88,7 +88,7 @@ export const CategorySchema = z.object({
   name: z.string().min(2),
   slug: z.string().min(2).regex(/^[a-z0-9-]+$/),
   image: z.string().url(),
-  parentId: z.string().cuid().optional(),
+  parentId: z.string().min(1).optional(),
   sortOrder: z.number().int().optional(),
 });
 

@@ -1,13 +1,20 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, X, CheckCircle, AlertCircle } from 'lucide-react';
 import { useLocationStore, SERVICEABLE_PINCODES } from '@/store/locationStore';
 
 export default function PincodeModal() {
+  const [mounted, setMounted] = useState(false);
   const { showPincodeModal, closePincodeModal, setPincode, pincode } = useLocationStore();
   const [input, setInput] = useState(pincode ?? '');
   const [status, setStatus] = useState<'idle' | 'serviceable' | 'not-serviceable'>('idle');
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
 
   const handleSubmit = () => {
     if (!/^\d{6}$/.test(input)) return;

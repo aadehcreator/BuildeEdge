@@ -3,6 +3,7 @@ import { CartItem } from '@/store/cartStore';
 import { getEffectivePrice } from '@/store/cartStore';
 import CartSummary from '@/components/cart/CartSummary';
 import { calculateCartTotals } from '@/store/cartStore';
+import { DEFAULT_PRODUCT_IMAGE } from '@/lib/constants';
 
 interface OrderSummaryProps { items: CartItem[]; walletDeduction?: number; }
 
@@ -21,7 +22,7 @@ export default function OrderSummary({ items, walletDeduction = 0 }: OrderSummar
             <li key={item.product.id} className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-lg bg-gray-50 overflow-hidden flex-shrink-0 border border-gray-100">
                 <Image
-                  src={item.product.images[0] ?? 'https://placehold.co/48x48?text=?'}
+                  src={item.product.images[0] ?? DEFAULT_PRODUCT_IMAGE}
                   alt={item.product.name}
                   width={48} height={48}
                   className="w-full h-full object-contain p-1"

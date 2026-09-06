@@ -13,12 +13,12 @@ export default function CategoryGrid({ categories }: { categories: Category[] })
   return (
     <section>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="section-title">Shop by Category</h2>
+        <h2 className="section-title">🧱 मुख्य निर्माण कैटेगरी (Core Categories)</h2>
         <Link href="/collections" className="text-sm text-primary font-semibold hover:underline">
-          All categories →
+          सभी देखें →
         </Link>
       </div>
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {categories.map((cat) => (
           <Link
             key={cat.id}

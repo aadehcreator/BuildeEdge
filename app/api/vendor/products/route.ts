@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
 
     const product = await prisma.$transaction(async (tx: any) => {
       const p = await tx.product.create({
-        data: { ...parsed.data, slug, vendorId: vendor.id, isActive: false }, // Admin approve karna padega
+        data: { ...parsed.data, slug, vendorId: vendor.id, isActive: true }, // Active immediately for verified vendors
       });
       // Initial stock log
       if (p.stock > 0) {

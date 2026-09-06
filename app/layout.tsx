@@ -37,8 +37,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${poppins.variable}`}>
-      <body className="min-h-screen bg-surface">
+    <html lang="en" className={`${inter.variable} ${poppins.variable}`} suppressHydrationWarning>
+      <body className="min-h-screen bg-surface" suppressHydrationWarning>
         {children}
         <CartDrawer />
         <PincodeModal />
