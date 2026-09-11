@@ -69,6 +69,15 @@ export default function CheckoutPage() {
     setPlacing(true);
 
     try {
+      // Sync local cart to server cart to ensure items exist in DB
+      for (const item of items) {
+        await fetch('/api/cart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+          body: JSON.stringify({ productId: item.product.id, quantity: item.quantity }),
+        });
+      }
+
       // 1. Create order
       const orderRes = await fetch('/api/orders', {
         method: 'POST',
@@ -105,7 +114,7 @@ export default function CheckoutPage() {
         amount: payData.amount,
         currency: payData.currency,
         order_id: payData.razorpayOrderId,
-        name: 'BuildeHive Store',
+        name: 'Build Edge',
         description: 'Construction Materials Order',
         prefill: { name: user?.name ?? '', contact: user?.phone ?? '' },
         theme: { color: '#E87722' },

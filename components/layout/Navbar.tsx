@@ -59,8 +59,8 @@ export default function Navbar() {
             {/* Logo & Location */}
             <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
               <Link href="/" className="flex-shrink-0 flex items-center gap-2 font-heading font-bold text-xl text-secondary">
-                <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm">HR</div>
-                <span className="tracking-tight">Home<span className="text-amber-600">Run</span></span>
+                <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm">BHS</div>
+                <span className="tracking-tight">BuildHive <span className="text-amber-600">Store</span></span>
               </Link>
 
               {/* Location & Speed */}

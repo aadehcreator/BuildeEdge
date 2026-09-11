@@ -13,6 +13,7 @@ const NAV = [
   { href: '/vendor/orders', icon: ShoppingCart, label: 'My Orders' },
   { href: '/vendor/products', icon: Package, label: 'My Products' },
   { href: '/vendor/inventory', icon: BarChart3, label: 'Inventory (IMS)' },
+  { href: '/vendor/payouts', icon: BarChart3, label: 'Payouts & Earnings' },
   { href: '/vendor/profile', icon: User, label: 'Profile' },
 ];
 
@@ -39,7 +40,7 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
         <Link href="/" className="flex items-center gap-2" onClick={onClose}>
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-sm">BE</div>
           <div>
-            <p className="font-heading font-bold text-white text-sm">BuildeHive Store</p>
+            <p className="font-heading font-bold text-white text-sm">Build Edge</p>
             <p className="text-[10px] text-orange-400 font-semibold">Vendor Panel</p>
           </div>
         </Link>

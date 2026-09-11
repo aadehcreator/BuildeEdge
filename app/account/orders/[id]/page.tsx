@@ -6,7 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import Image from 'next/image';
 import Link from 'next/link';
-import { CheckCircle, Circle, Loader2, MapPin, Phone } from 'lucide-react';
+import { CheckCircle, Circle, Loader2, MapPin, Phone, Printer } from 'lucide-react';
 import LiveTrackingMap from '@/components/home/LiveTrackingMap';
 import { DEFAULT_PRODUCT_IMAGE } from '@/lib/constants';
 
@@ -56,14 +56,24 @@ export default function OrderDetailPage() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="font-heading font-bold text-xl text-secondary">Order #{order.id.slice(-8).toUpperCase()}</h1>
           <p className="text-xs text-muted mt-0.5">{new Date(order.createdAt).toLocaleString('en-IN')}</p>
         </div>
-        <span className={`text-xs px-3 py-1.5 rounded-full font-semibold ${isCancelled ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-          {order.status.replace(/_/g, ' ')}
-        </span>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              window.print();
+            }}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-secondary rounded-xl text-xs font-semibold transition-colors"
+          >
+            <Printer size={14} /> Download Tax Invoice
+          </button>
+          <span className={`text-xs px-3 py-1.5 rounded-full font-semibold ${isCancelled ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+            {order.status.replace(/_/g, ' ')}
+          </span>
+        </div>
       </div>
 
       {/* Status timeline */}
