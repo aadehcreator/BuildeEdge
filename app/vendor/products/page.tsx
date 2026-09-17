@@ -2,6 +2,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
+import Cookies from 'js-cookie';
 import Image from 'next/image';
 import { DEFAULT_PRODUCT_IMAGE } from '@/lib/constants';
 import { Plus, Loader2, ToggleLeft, ToggleRight, Trash2, PackagePlus, Sparkles, Store, ShieldAlert, ExternalLink, CheckCircle2 } from 'lucide-react';
@@ -182,13 +183,19 @@ export default function VendorProductsPage() {
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+    const token = accessToken || Cookies.get('token');
+    if (!token) {
+      toast.error('Session expired. Please login again.');
+      event.target.value = '';
+      return;
+    }
     setUploadingImage(true);
     try {
       const body = new FormData();
       body.append('file', file);
       const res = await fetch('/api/uploads/product', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${accessToken}` },
+        headers: { Authorization: `Bearer ${token}` },
         body,
       });
       const data = await res.json() as { url?: string; error?: string };

@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
 import { useAuthStore } from '@/store/authStore';
+import Cookies from 'js-cookie';
 import Image from 'next/image';
 import { DEFAULT_PRODUCT_IMAGE } from '@/lib/constants';
 import { Search, Plus, Loader2, Pencil, Trash2, ToggleLeft, ToggleRight } from 'lucide-react';
@@ -169,13 +170,19 @@ export default function AdminProductsPage() {
   const handleAddImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+    const token = accessToken || Cookies.get('token');
+    if (!token) {
+      toast.error('Session expired. Please login again.');
+      event.target.value = '';
+      return;
+    }
     setUploadingImage(true);
     try {
       const body = new FormData();
       body.append('file', file);
       const res = await fetch('/api/uploads/product', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${accessToken}` },
+        headers: { Authorization: `Bearer ${token}` },
         body,
       });
       const data = await res.json() as { url?: string; error?: string };
