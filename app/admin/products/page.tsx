@@ -15,6 +15,7 @@ interface Product {
 }
 
 interface Pagination { page: number; limit: number; total: number; pages: number; }
+interface CategoryOption { id: string; name: string; }
 
 export default function AdminProductsPage() {
   const { accessToken } = useAuthStore();
@@ -25,6 +26,22 @@ export default function AdminProductsPage() {
   const [searchInput, setSearchInput] = useState('');
   const [page, setPage] = useState(1);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [categories, setCategories] = useState<CategoryOption[]>([]);
+
+  const [addingProduct, setAddingProduct] = useState(false);
+  const [addName, setAddName] = useState('');
+  const [addDescription, setAddDescription] = useState('');
+  const [addCategoryId, setAddCategoryId] = useState('');
+  const [addBrandId, setAddBrandId] = useState('');
+  const [addImage, setAddImage] = useState('');
+  const [addMrp, setAddMrp] = useState('');
+  const [addSellingPrice, setAddSellingPrice] = useState('');
+  const [addUnit, setAddUnit] = useState('');
+  const [addSku, setAddSku] = useState('');
+  const [addStock, setAddStock] = useState('');
+  const [addFeatured, setAddFeatured] = useState(false);
+  const [addNewLaunch, setAddNewLaunch] = useState(false);
+  const [adding, setAdding] = useState(false);
 
   // Edit modal state
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -97,6 +114,57 @@ export default function AdminProductsPage() {
 
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
 
+  useEffect(() => {
+    fetch('/api/admin/categories', { headers: { Authorization: `Bearer ${accessToken}` } })
+      .then((res) => res.ok ? res.json() : Promise.reject(new Error('Failed to fetch categories')))
+      .then((data: { categories?: CategoryOption[] }) => {
+        const nextCategories = data.categories ?? [];
+        setCategories(nextCategories);
+        if (!addCategoryId && nextCategories[0]) setAddCategoryId(nextCategories[0].id);
+      })
+      .catch(() => toast.error('Could not load categories'));
+  }, [accessToken, addCategoryId]);
+
+  const resetAddForm = () => {
+    setAddName(''); setAddDescription(''); setAddBrandId(''); setAddImage('');
+    setAddMrp(''); setAddSellingPrice(''); setAddUnit(''); setAddSku('');
+    setAddStock(''); setAddFeatured(false); setAddNewLaunch(false);
+    setAddCategoryId(categories[0]?.id ?? '');
+  };
+
+  const handleAddProduct = async () => {
+    if (!addName || !addCategoryId || !addImage || !addMrp || !addSellingPrice || !addUnit || !addSku || !addStock) {
+      toast.error('Please fill all required product fields');
+      return;
+    }
+    setAdding(true);
+    try {
+      const res = await fetch('/api/admin/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+        body: JSON.stringify({
+          name: addName,
+          description: addDescription || undefined,
+          categoryId: addCategoryId,
+          brandId: addBrandId || undefined,
+          images: [addImage],
+          mrp: Number(addMrp), sellingPrice: Number(addSellingPrice), bulkPrices: [],
+          unit: addUnit, sku: addSku, stock: Number(addStock),
+          isFeatured: addFeatured, isNewLaunch: addNewLaunch, cashbackPercent: 0,
+          tags: [], specifications: {}, isActive: true,
+        }),
+      });
+      const data = await res.json() as { error?: string };
+      if (!res.ok) throw new Error(data.error || 'Failed to create product');
+      toast.success('Product added successfully');
+      setAddingProduct(false); resetAddForm(); fetchProducts();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to create product');
+    } finally {
+      setAdding(false);
+    }
+  };
+
   const toggleActive = async (id: string, current: boolean) => {
     setUpdating(id);
     try {
@@ -152,7 +220,7 @@ export default function AdminProductsPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="font-heading font-bold text-2xl text-white">Products</h1>
-        <button className="flex items-center gap-1.5 px-3 py-2 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark transition-colors">
+        <button onClick={() => setAddingProduct(true)} className="flex items-center gap-1.5 px-3 py-2 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark transition-colors">
           <Plus size={14} /> Add Product
         </button>
       </div>
@@ -358,6 +426,35 @@ export default function AdminProductsPage() {
                 {saving && <Loader2 size={14} className="animate-spin" />}
                 Save Changes
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {addingProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-800">
+              <h2 className="text-lg font-bold text-white">Add Product</h2>
+              <button onClick={() => setAddingProduct(false)} className="text-gray-400 hover:text-white text-sm font-semibold">✕</button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="md:col-span-2"><label className="text-xs text-gray-400 block mb-1">Product Name *</label><input value={addName} onChange={(e) => setAddName(e.target.value)} placeholder="e.g. UltraTech Cement PPC" className="admin-product-input" /></div>
+              <div className="md:col-span-2"><label className="text-xs text-gray-400 block mb-1">Description</label><textarea value={addDescription} onChange={(e) => setAddDescription(e.target.value)} rows={2} className="admin-product-input" /></div>
+              <div><label className="text-xs text-gray-400 block mb-1">Category *</label><select value={addCategoryId} onChange={(e) => setAddCategoryId(e.target.value)} className="admin-product-input"><option value="">Select category</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></div>
+              <div><label className="text-xs text-gray-400 block mb-1">Brand ID</label><input value={addBrandId} onChange={(e) => setAddBrandId(e.target.value)} placeholder="Optional" className="admin-product-input" /></div>
+              <div className="md:col-span-2"><label className="text-xs text-gray-400 block mb-1">Image URL or local path *</label><input value={addImage} onChange={(e) => setAddImage(e.target.value)} placeholder="/images/slider/tmt.webp or https://..." className="admin-product-input" /></div>
+              <div><label className="text-xs text-gray-400 block mb-1">MRP (₹) *</label><input type="number" min="0" value={addMrp} onChange={(e) => setAddMrp(e.target.value)} className="admin-product-input" /></div>
+              <div><label className="text-xs text-gray-400 block mb-1">Selling Price (₹) *</label><input type="number" min="0" value={addSellingPrice} onChange={(e) => setAddSellingPrice(e.target.value)} className="admin-product-input" /></div>
+              <div><label className="text-xs text-gray-400 block mb-1">Unit *</label><input value={addUnit} onChange={(e) => setAddUnit(e.target.value)} placeholder="Bag (50kg)" className="admin-product-input" /></div>
+              <div><label className="text-xs text-gray-400 block mb-1">SKU *</label><input value={addSku} onChange={(e) => setAddSku(e.target.value)} placeholder="CEM-001" className="admin-product-input" /></div>
+              <div><label className="text-xs text-gray-400 block mb-1">Stock *</label><input type="number" min="0" value={addStock} onChange={(e) => setAddStock(e.target.value)} className="admin-product-input" /></div>
+              <label className="flex items-center gap-2 text-sm text-gray-300 self-end pb-2"><input type="checkbox" checked={addFeatured} onChange={(e) => setAddFeatured(e.target.checked)} /> Featured product</label>
+              <label className="flex items-center gap-2 text-sm text-gray-300"><input type="checkbox" checked={addNewLaunch} onChange={(e) => setAddNewLaunch(e.target.checked)} /> New launch</label>
+            </div>
+            <div className="flex justify-end gap-3 pt-3 border-t border-gray-800">
+              <button onClick={() => setAddingProduct(false)} className="px-4 py-2 bg-gray-800 text-gray-300 rounded-xl text-sm hover:bg-gray-700">Cancel</button>
+              <button onClick={handleAddProduct} disabled={adding} className="flex items-center gap-2 px-5 py-2 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-dark disabled:opacity-50">{adding && <Loader2 size={14} className="animate-spin" />} Add Product</button>
             </div>
           </div>
         </div>

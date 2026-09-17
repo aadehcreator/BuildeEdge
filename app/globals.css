@@ -68,6 +68,10 @@
     @apply text-xl font-heading font-semibold text-secondary;
   }
 
+  .admin-product-input {
+    @apply w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-primary;
+  }
+
   .skeleton {
     @apply animate-pulse bg-gray-200 rounded;
   }

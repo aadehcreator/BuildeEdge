@@ -68,7 +68,7 @@ export const ProductSchema = z.object({
   description: z.string().optional(),
   categoryId: z.string().min(1, 'Category ID is required'),
   brandId: z.string().min(1).optional(),
-  images: z.array(z.string().url()).min(1),
+  images: z.array(z.string().refine((value) => value.startsWith('/') || z.string().url().safeParse(value).success, 'Enter a valid image URL or local path')).min(1),
   mrp: z.number().positive(),
   sellingPrice: z.number().positive(),
   bulkPrices: z.array(BulkPriceSchema).optional(),

@@ -87,6 +87,7 @@ export default function VendorProductsPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [notApproved, setNotApproved] = useState(false);
   const [loggingIn, setLoggingIn] = useState(false);
@@ -177,6 +178,30 @@ export default function VendorProductsPage() {
 
   const f = (key: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setForm((p) => ({ ...p, [key]: e.target.value }));
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const body = new FormData();
+      body.append('file', file);
+      const res = await fetch('/api/uploads/product', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${accessToken}` },
+        body,
+      });
+      const data = await res.json() as { url?: string; error?: string };
+      if (!res.ok || !data.url) throw new Error(data.error ?? 'Image upload failed');
+      setForm((previous) => ({ ...previous, images: [data.url as string] }));
+      toast.success('Image uploaded successfully');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Image upload failed');
+    } finally {
+      setUploadingImage(false);
+      event.target.value = '';
+    }
+  };
 
   const handleSave = async () => {
     if (!accessToken) {
@@ -406,6 +431,12 @@ export default function VendorProductsPage() {
               <label className={lbl}>Image URL (उत्पाद की फोटो लिंक)</label>
               <input value={form.images[0]} onChange={(e) => setForm((p) => ({ ...p, images: [e.target.value] }))}
                 placeholder="https://images.unsplash.com/photo-..." className={inp} />
+              <label className="mt-2 flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-gray-600 bg-gray-800/60 px-3 py-3 text-xs text-gray-300 hover:border-primary hover:text-white">
+                {uploadingImage ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+                {uploadingImage ? 'Uploading image...' : 'Choose image from phone / PC'}
+                <input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploadingImage} className="sr-only" />
+              </label>
+              <p className="mt-1 text-[10px] text-gray-500">JPG, PNG, WEBP up to 5MB</p>
             </div>
 
             <div className="sm:col-span-2">
