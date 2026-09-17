@@ -42,6 +42,7 @@ export default function AdminProductsPage() {
   const [addFeatured, setAddFeatured] = useState(false);
   const [addNewLaunch, setAddNewLaunch] = useState(false);
   const [adding, setAdding] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   // Edit modal state
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -162,6 +163,30 @@ export default function AdminProductsPage() {
       toast.error(error instanceof Error ? error.message : 'Failed to create product');
     } finally {
       setAdding(false);
+    }
+  };
+
+  const handleAddImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const body = new FormData();
+      body.append('file', file);
+      const res = await fetch('/api/uploads/product', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${accessToken}` },
+        body,
+      });
+      const data = await res.json() as { url?: string; error?: string };
+      if (!res.ok || !data.url) throw new Error(data.error ?? 'Image upload failed');
+      setAddImage(data.url);
+      toast.success('Image uploaded successfully');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Image upload failed');
+    } finally {
+      setUploadingImage(false);
+      event.target.value = '';
     }
   };
 
@@ -443,7 +468,16 @@ export default function AdminProductsPage() {
               <div className="md:col-span-2"><label className="text-xs text-gray-400 block mb-1">Description</label><textarea value={addDescription} onChange={(e) => setAddDescription(e.target.value)} rows={2} className="admin-product-input" /></div>
               <div><label className="text-xs text-gray-400 block mb-1">Category *</label><select value={addCategoryId} onChange={(e) => setAddCategoryId(e.target.value)} className="admin-product-input"><option value="">Select category</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></div>
               <div><label className="text-xs text-gray-400 block mb-1">Brand ID</label><input value={addBrandId} onChange={(e) => setAddBrandId(e.target.value)} placeholder="Optional" className="admin-product-input" /></div>
-              <div className="md:col-span-2"><label className="text-xs text-gray-400 block mb-1">Image URL or local path *</label><input value={addImage} onChange={(e) => setAddImage(e.target.value)} placeholder="/images/slider/tmt.webp or https://..." className="admin-product-input" /></div>
+              <div className="md:col-span-2">
+                <label className="text-xs text-gray-400 block mb-1">Product Image *</label>
+                <input value={addImage} onChange={(e) => setAddImage(e.target.value)} placeholder="/images/slider/tmt.webp or https://..." className="admin-product-input" />
+                <label className="mt-2 flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-gray-600 bg-gray-800/60 px-3 py-3 text-xs text-gray-300 hover:border-primary hover:text-white">
+                  {uploadingImage ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+                  {uploadingImage ? 'Uploading image...' : 'Choose image from phone / PC'}
+                  <input type="file" accept="image/*" onChange={handleAddImageUpload} disabled={uploadingImage} className="sr-only" />
+                </label>
+                <p className="mt-1 text-[10px] text-gray-500">JPG, PNG, WEBP up to 5MB</p>
+              </div>
               <div><label className="text-xs text-gray-400 block mb-1">MRP (₹) *</label><input type="number" min="0" value={addMrp} onChange={(e) => setAddMrp(e.target.value)} className="admin-product-input" /></div>
               <div><label className="text-xs text-gray-400 block mb-1">Selling Price (₹) *</label><input type="number" min="0" value={addSellingPrice} onChange={(e) => setAddSellingPrice(e.target.value)} className="admin-product-input" /></div>
               <div><label className="text-xs text-gray-400 block mb-1">Unit *</label><input value={addUnit} onChange={(e) => setAddUnit(e.target.value)} placeholder="Bag (50kg)" className="admin-product-input" /></div>
