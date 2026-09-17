@@ -1,8 +1,10 @@
-import { PrismaClient } from '@/src/generated/prisma';
+const { PrismaClient } = require('../src/generated/prisma');
 
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
+type PrismaClientType = InstanceType<typeof PrismaClient>;
 
-let prismaClient: PrismaClient | null = null;
+const globalForPrisma = globalThis as unknown as { prisma: PrismaClientType };
+
+let prismaClient: PrismaClientType | null = null;
 
 if (process.env.DATABASE_URL) {
   try {
@@ -21,7 +23,7 @@ export const mockBanners = [
     id: 'b1',
     title: 'Super Grade PPC Cement in 60 Mins',
     subtitle: 'Direct from factory plants to your Gwalior site',
-    image: 'https://images.unsplash.com/photo-1590069261209-f8e9b8642343?auto=format&fit=crop&w=1200&q=80',
+    image: '/images/slider/reta1.jpg',
     link: '/collections/cement',
     isActive: true,
     sortOrder: 1,
@@ -29,20 +31,38 @@ export const mockBanners = [
   {
     id: 'b2',
     title: 'TMT Steel Bars - Fe 500D',
-    subtitle: 'Highest earthquake resistance & tensile strength',
-    image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1200&q=80',
+    subtitle: 'Highest earthquake resistance & tensile strength for pillars & slabs',
+    image: '/images/slider/tmt.webp',
     link: '/collections/steel-tmt',
     isActive: true,
     sortOrder: 2,
   },
   {
     id: 'b3',
-    title: 'Waterproof Plywood & Blockboards',
-    subtitle: 'BWR & BWP grade with 25-year warranty',
-    image: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=80',
-    link: '/collections/plywood-boards',
+    title: 'Washed River Sand (100 Cu.Ft Trolley)',
+    subtitle: 'Pure screened river sand for high-adhesion plaster & concrete',
+    image: '/images/slider/reta.webp',
+    link: '/collections/sand-aggregates',
     isActive: true,
     sortOrder: 3,
+  },
+  {
+    id: 'b4',
+    title: 'Blue Granite Aggregates / Gitti (10mm & 20mm)',
+    subtitle: 'Strong angular crushed stone for RCC foundations, beams & slabs',
+    image: '/images/slider/gitti.jpg',
+    link: '/collections/sand-aggregates',
+    isActive: true,
+    sortOrder: 4,
+  },
+  {
+    id: 'b5',
+    title: 'Red Clay Bricks & AAC Blocks',
+    subtitle: 'First-class kiln burnt red bricks & lightweight blocks for sturdy walls',
+    image: '/images/slider/gitti1.webp',
+    link: '/collections/bricks-blocks',
+    isActive: true,
+    sortOrder: 5,
   },
 ];
 
@@ -52,13 +72,13 @@ export const mockCategories = [
     id: 'c1',
     name: 'Cement & Mortar',
     slug: 'cement',
-    image: 'https://images.unsplash.com/photo-1590069261209-f8e9b8642343?auto=format&fit=crop&w=400&q=80',
+    image: '/images/slider/reta1.jpg',
     parentId: null,
     sortOrder: 1,
     isActive: true,
     children: [
-      { id: 'c1-1', name: 'OPC 53 Cement', slug: 'cement', image: 'https://images.unsplash.com/photo-1590069261209-f8e9b8642343?auto=format&fit=crop&w=400&q=80' },
-      { id: 'c1-2', name: 'Waterproof Cement', slug: 'cement', image: 'https://images.unsplash.com/photo-1590069261209-f8e9b8642343?auto=format&fit=crop&w=400&q=80' },
+      { id: 'c1-1', name: 'OPC 53 Cement', slug: 'cement', image: '/images/slider/reta1.jpg' },
+      { id: 'c1-2', name: 'Waterproof Cement', slug: 'cement', image: '/images/slider/reta1.jpg' },
     ],
     _count: { products: 3 },
   },
@@ -66,13 +86,13 @@ export const mockCategories = [
     id: 'c2',
     name: 'Steel & TMT Bars',
     slug: 'steel-tmt',
-    image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=400&q=80',
+    image: '/images/slider/tmt.webp',
     parentId: null,
     sortOrder: 2,
     isActive: true,
     children: [
-      { id: 'c2-1', name: 'Fe 500D Rebars', slug: 'steel-tmt', image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=400&q=80' },
-      { id: 'c2-2', name: 'Binding Wire', slug: 'steel-tmt', image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=400&q=80' },
+      { id: 'c2-1', name: 'Fe 500D Rebars', slug: 'steel-tmt', image: '/images/slider/tmt.webp' },
+      { id: 'c2-2', name: 'Binding Wire', slug: 'steel-tmt', image: '/images/slider/tmt1.jpg' },
     ],
     _count: { products: 2 },
   },
@@ -99,22 +119,22 @@ export const mockCategories = [
     sortOrder: 4,
     isActive: true,
     children: [
-      { id: 'c4-1', name: 'Red Clay Bricks (लाल ईंट)', slug: 'bricks-blocks', image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=400&q=80' },
+      { id: 'c4-1', name: 'Red Clay Bricks', slug: 'bricks-blocks', image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=400&q=80' },
       { id: 'c4-2', name: 'AAC Lightweight Blocks', slug: 'bricks-blocks', image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=400&q=80' },
     ],
     _count: { products: 2 },
   },
   {
     id: 'c9',
-    name: 'Sand & Aggregates (रेत और गिट्टी)',
+    name: 'Sand & Aggregates',
     slug: 'sand-aggregates',
     image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=80',
     parentId: null,
     sortOrder: 4.5,
     isActive: true,
     children: [
-      { id: 'c9-1', name: 'River Sand (नदी की रेत/बजरी)', slug: 'sand-aggregates', image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=80' },
-      { id: 'c9-2', name: 'Granite Gitti (10mm/20mm गिट्टी)', slug: 'sand-aggregates', image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=400&q=80' },
+      { id: 'c9-1', name: 'River Sand', slug: 'sand-aggregates', image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=80' },
+      { id: 'c9-2', name: 'Granite Aggregates (10mm/20mm)', slug: 'sand-aggregates', image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=400&q=80' },
     ],
     _count: { products: 2 },
   },
@@ -454,7 +474,7 @@ export const mockProducts = [
     isNewLaunch: true,
     cashbackPercent: 1.0,
     tags: ['aac', 'blocks', 'lightweight', 'masonry'],
-    specifications: { Dimensions: '600x200x150 mm', Density: '550-650 kg/m3', 'Kaam / Purpose': 'Lightweight modern bricks (alternative - तेज़ चिनाई)' },
+    specifications: { Dimensions: '600x200x150 mm', Density: '550-650 kg/m3', Purpose: 'Lightweight modern masonry blocks' },
     isActive: true,
     brand: null,
     category: { name: 'Bricks & Blocks', slug: 'bricks-blocks' },
@@ -462,7 +482,7 @@ export const mockProducts = [
   },
   {
     id: 'p-sand',
-    name: 'Washed River Sand / Ret (चंबल/नदी की रेत - प्लास्टर & कंक्रीट)',
+    name: 'Washed River Sand (Trolley)',
     slug: 'washed-river-sand-ret-trolley',
     description: 'Triple-screened river sand free from mud and organic silt. Essential for high-adhesion cement mortar, smooth wall plastering, and RCC structural concrete.',
     categoryId: 'c9',
@@ -480,16 +500,16 @@ export const mockProducts = [
     isFeatured: true,
     isNewLaunch: true,
     cashbackPercent: 1.0,
-    tags: ['sand', 'ret', 'bajri', 'cement mix', 'plaster', 'chambal ret'],
-    specifications: { 'Kaam / Purpose': 'Cement mix mein, plaster mein', Type: 'Coarse Screened River Sand', SiltContent: '< 3% Washed' },
+    tags: ['sand', 'bajri', 'cement mix', 'plaster'],
+    specifications: { Purpose: 'Cement mortar mixing & smooth plastering', Type: 'Coarse Screened River Sand', SiltContent: '< 3% Washed' },
     isActive: true,
     brand: null,
-    category: { name: 'Sand & Aggregates (रेत और गिट्टी)', slug: 'sand-aggregates' },
+    category: { name: 'Sand & Aggregates', slug: 'sand-aggregates' },
     createdAt: '2026-03-04T00:00:00Z',
   },
   {
     id: 'p-gitti',
-    name: 'Blue Granite Aggregate / Gitti (20mm & 10mm कंक्रीट रोड़ी)',
+    name: 'Blue Granite Aggregate / Gitti (20mm & 10mm)',
     slug: 'blue-granite-aggregate-gitti-20mm',
     description: 'Machine-crushed angular blue granite aggregate stones (10mm - 20mm graded mix). Provides compressive structural strength for RCC pillars, beams, footings, and slab casting.',
     categoryId: 'c9',
@@ -507,11 +527,11 @@ export const mockProducts = [
     isFeatured: true,
     isNewLaunch: true,
     cashbackPercent: 1.0,
-    tags: ['aggregate', 'gitti', 'concrete mix', 'slab', 'pillar', 'foundation'],
-    specifications: { 'Kaam / Purpose': 'Concrete mix mein (foundation, slab, pillar)', StoneType: 'Hard Blue Granite', Size: '10mm - 20mm Angular' },
+    tags: ['aggregate', 'concrete mix', 'slab', 'pillar', 'foundation'],
+    specifications: { Purpose: 'RCC foundations, pillars & slab casting', StoneType: 'Hard Blue Granite', Size: '10mm - 20mm Angular' },
     isActive: true,
     brand: null,
-    category: { name: 'Sand & Aggregates (रेत और गिट्टी)', slug: 'sand-aggregates' },
+    category: { name: 'Sand & Aggregates', slug: 'sand-aggregates' },
     createdAt: '2026-03-04T00:00:00Z',
   },
   {
@@ -1399,7 +1419,7 @@ function createMockModel(modelName: string) {
   };
 }
 
-export const prisma = new Proxy({} as PrismaClient, {
+export const prisma = new Proxy({} as PrismaClientType, {
   get(target, prop) {
     if (prop === '$connect' || prop === '$disconnect') {
       return async () => {};

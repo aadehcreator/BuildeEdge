@@ -1,6 +1,14 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
+const LOCAL_CATEGORY_IMAGES: Record<string, string> = {
+  cement: '/images/slider/reta1.jpg',
+  'steel-tmt': '/images/slider/tmt.webp',
+  'bricks-blocks': '/images/slider/gitti1.webp',
+  'sand-aggregates': '/images/slider/reta.webp',
+  default: '/images/slider/gitti.jpg',
+};
+
 interface Category {
   id: string;
   name: string;
@@ -13,13 +21,16 @@ export default function CategoryGrid({ categories }: { categories: Category[] })
   return (
     <section>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="section-title">🧱 मुख्य निर्माण कैटेगरी (Core Categories)</h2>
+        <h2 className="section-title">Core Categories</h2>
         <Link href="/collections" className="text-sm text-primary font-semibold hover:underline">
-          सभी देखें →
+          View All →
         </Link>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {categories.map((cat) => (
+        {categories.map((cat) => {
+          const imageSrc = cat.image && cat.image.startsWith('/images/') ? cat.image : LOCAL_CATEGORY_IMAGES[cat.slug] ?? LOCAL_CATEGORY_IMAGES.default;
+
+          return (
           <Link
             key={cat.id}
             href={`/collections/${cat.slug}`}
@@ -27,7 +38,7 @@ export default function CategoryGrid({ categories }: { categories: Category[] })
           >
             <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden bg-orange-50 flex items-center justify-center">
               <Image
-                src={cat.image}
+                src={imageSrc}
                 alt={cat.name}
                 width={56}
                 height={56}
@@ -38,7 +49,8 @@ export default function CategoryGrid({ categories }: { categories: Category[] })
               {cat.name}
             </span>
           </Link>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

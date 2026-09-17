@@ -8,6 +8,36 @@ import { Truck, Clock, Shield, Headphones } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
+const DEFAULT_HOME_BANNERS = [
+  {
+    id: 'local-banner-1',
+    title: 'TMT Steel & Structural Strength',
+    subtitle: 'High-grade TMT bars for durable slabs, beams and columns.',
+    image: '/images/slider/tmt.webp',
+    link: '/collections/steel-tmt',
+    isActive: true,
+    sortOrder: 1,
+  },
+  {
+    id: 'local-banner-2',
+    title: 'River Sand & Quality Aggregates',
+    subtitle: 'Clean, screened sand and gitti for strong concrete mixes.',
+    image: '/images/slider/reta.webp',
+    link: '/collections/sand-aggregates',
+    isActive: true,
+    sortOrder: 2,
+  },
+  {
+    id: 'local-banner-3',
+    title: 'Gitti & Foundation Essentials',
+    subtitle: 'Reliable stone aggregates for RCC foundations and roads.',
+    image: '/images/slider/gitti.jpg',
+    link: '/collections/sand-aggregates',
+    isActive: true,
+    sortOrder: 3,
+  },
+];
+
 const TRUST_BADGES = [
   { icon: Truck, label: '60-Min Delivery', sub: 'In Gwalior' },
   { icon: Clock, label: 'Open 8AM–8PM', sub: 'All days' },
@@ -84,7 +114,16 @@ async function getHomeData() {
       bulkPrices: p.bulkPrices as Array<{ minQty: number; price: number }> | null,
     }));
 
-  return { banners, categories, coreProducts };
+  const bannersToRender = DEFAULT_HOME_BANNERS.map((fallback, index) => ({
+    ...fallback,
+    ...banners[index],
+    image: fallback.image,
+    title: banners[index]?.title ?? fallback.title,
+    subtitle: banners[index]?.subtitle ?? fallback.subtitle,
+    link: banners[index]?.link ?? fallback.link,
+  }));
+
+  return { banners: bannersToRender, categories, coreProducts };
 }
 
 export default async function HomePage() {

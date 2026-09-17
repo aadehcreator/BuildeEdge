@@ -23,7 +23,7 @@ const CORE_MATERIALS: EssentialMaterial[] = [
     workHindi: 'Foundation, masonry and smooth plaster',
     badge: 'Foundation & Plaster',
     slug: 'cement',
-    image: 'https://images.unsplash.com/photo-1590069261209-f8e9b8642343?auto=format&fit=crop&w=600&q=80',
+    image: '/images/slider/reta1.jpg',
     icon: Layers,
     accentBg: 'bg-amber-50',
     accentText: 'text-amber-800',
@@ -35,7 +35,7 @@ const CORE_MATERIALS: EssentialMaterial[] = [
     workHindi: 'Strong exterior and interior wall construction',
     badge: 'Wall Masonry',
     slug: 'bricks-blocks',
-    image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=600&q=80',
+    image: '/images/slider/gitti1.webp',
     icon: Building,
     accentBg: 'bg-red-50',
     accentText: 'text-red-800',
@@ -47,7 +47,7 @@ const CORE_MATERIALS: EssentialMaterial[] = [
     workHindi: 'Cement mortar mixing and smooth plastering',
     badge: 'Mortar & Plaster',
     slug: 'sand-aggregates',
-    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80',
+    image: '/images/slider/reta.webp',
     icon: Shovel,
     accentBg: 'bg-yellow-50',
     accentText: 'text-yellow-800',
@@ -59,7 +59,7 @@ const CORE_MATERIALS: EssentialMaterial[] = [
     workHindi: 'Concrete mix for foundations, beams and slab casting',
     badge: 'Concrete & Slab',
     slug: 'sand-aggregates',
-    image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=600&q=80',
+    image: '/images/slider/gitti.jpg',
     icon: Boxes,
     accentBg: 'bg-slate-100',
     accentText: 'text-slate-800',
@@ -71,7 +71,7 @@ const CORE_MATERIALS: EssentialMaterial[] = [
     workHindi: 'Maximum tensile strength for pillars, beams and slabs',
     badge: 'Pillars & Slabs',
     slug: 'steel-tmt',
-    image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=600&q=80',
+    image: '/images/slider/tmt.webp',
     icon: Hammer,
     accentBg: 'bg-blue-50',
     accentText: 'text-blue-800',
@@ -83,7 +83,7 @@ const CORE_MATERIALS: EssentialMaterial[] = [
     workHindi: 'Lightweight modern masonry blocks',
     badge: 'Modern Masonry',
     slug: 'bricks-blocks',
-    image: 'https://images.unsplash.com/photo-1590069261209-f8e9b8642343?auto=format&fit=crop&w=600&q=80',
+    image: '/images/slider/eate.webp',
     icon: Sparkles,
     accentBg: 'bg-emerald-50',
     accentText: 'text-emerald-800',
@@ -97,10 +97,10 @@ export default function MaterialGuide() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-3 border-b border-orange-100/60">
         <div>
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold mb-1.5">
-            <span>🏗️ मुख्य निर्माण सामग्री एवं काम</span>
+            <span>🏗️ Essential Construction Materials</span>
           </div>
           <h2 className="font-heading font-extrabold text-xl sm:text-2xl text-secondary">
-            घर निर्माण के 6 मुख्य स्तंभ (Material &amp; Kaam)
+            6 Core Pillars of Building Construction
           </h2>
         </div>
 
@@ -108,7 +108,7 @@ export default function MaterialGuide() {
           href="/collections"
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-xs font-semibold text-secondary hover:text-primary hover:border-primary transition-colors shadow-2xs self-start sm:self-auto"
         >
-          पूरा कैटलॉग देखें <ArrowRight size={13} />
+          View Full Catalog <ArrowRight size={13} />
         </Link>
       </div>
 
@@ -151,7 +151,7 @@ export default function MaterialGuide() {
                 {/* Kaam Box */}
                 <div className={`p-2.5 rounded-lg border border-gray-100/80 ${item.accentBg}`}>
                   <span className="block text-[10px] font-bold uppercase tracking-wider text-muted">
-                    काम (Purpose):
+                    Purpose:
                   </span>
                   <p className={`text-xs font-bold mt-0.5 leading-snug ${item.accentText}`}>
                     {item.workHindi}
@@ -162,13 +162,13 @@ export default function MaterialGuide() {
                 <div className="pt-2 border-t border-gray-50 flex items-center justify-between">
                   <div className="flex items-center gap-1 text-[11px] text-emerald-700 font-semibold">
                     <CheckCircle2 size={13} className="text-emerald-600" />
-                    <span>साइट डिलीवरी</span>
+                    <span>Site Delivery</span>
                   </div>
                   <Link
                     href={`/collections/${item.slug}`}
                     className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary/90 transition-colors shadow-2xs"
                   >
-                    <span>ऑर्डर करें</span>
+                    <span>Order Now</span>
                     <ArrowRight size={12} />
                   </Link>
                 </div>
@@ -185,25 +185,25 @@ export default function MaterialGuide() {
             🚚
           </div>
           <div>
-            <span className="font-bold text-secondary text-sm">ग्वालियर एवं आसपास साइट पर सीधा बल्क/ट्रॉली ऑर्डर:</span>
-            <p className="text-muted">सीमेंट, ईंट, रेत, गिट्टी व सरिया सीधे आपकी निर्माण साइट पर 60 मिनट से लेकर शेड्यूल्ड समय पर डिलीवर किए जाते हैं।</p>
+            <span className="font-bold text-secondary text-sm">Direct Bulk / Trolley Site Delivery Available:</span>
+            <p className="text-muted">Cement, bricks, sand, aggregate and steel delivered directly to your construction site within 60 minutes or scheduled timeslots.</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 flex-shrink-0 w-full md:w-auto">
           <a
-            href="https://wa.me/918109585179?text=Namaste,%20mujhe%20Cement,%20Sariya,%20Ret,%20Gitti%20ka%20bulk%20order%20chahiye"
+            href="https://wa.me/918109585179?text=Hello,%20I%20want%20to%20order%20construction%20materials%20in%20bulk"
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1 md:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition-colors shadow-xs"
           >
-            <span>💬 WhatsApp ऑर्डर</span>
+            <span>💬 WhatsApp Order</span>
           </a>
           <a
             href="tel:+918109585179"
             className="flex-1 md:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg bg-secondary text-white font-bold hover:bg-secondary/90 transition-colors"
           >
-            <span>📞 कॉल करें</span>
+            <span>📞 Call Us</span>
           </a>
         </div>
       </div>
